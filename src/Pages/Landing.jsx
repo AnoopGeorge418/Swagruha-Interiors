@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Phone, Menu, X, ChevronRight, Star, CheckCircle, Instagram, Twitter, Linkedin, Mail, MessageCircle, Users, Award, Heart, TrendingUp, CheckCircle2, Sparkles, ArrowRight } from 'lucide-react';
+import { Phone, Menu, X, ChevronRight, Star, CheckCircle, Instagram, Twitter, Linkedin, Mail, MessageCircle, Users, Award, Heart, TrendingUp, CheckCircle2, Sparkles, ArrowRight, HelpCircle, MapPin, Clock, Navigation  } from 'lucide-react';
 
 // Intersection Observer Hook for animations
 const useIntersectionObserver = (options = {}) => {
@@ -394,482 +394,356 @@ const AboutSection = () => {
   );
 };
 
-// Portfolio Section Component with Advanced Animations and Effects
+// Portfolio Section Component with animations and modern design
 const PortfolioSection = () => {
-  const [activeFilter, setActiveFilter] = useState('all');
-  const [filteredProjects, setFilteredProjects] = useState([]);
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [selectedProject, setSelectedProject] = useState(null);
   const [hoveredProject, setHoveredProject] = useState(null);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxImage, setLightboxImage] = useState(null);
-  const [visibleProjects, setVisibleProjects] = useState(6);
   const [sectionRef, sectionVisible] = useIntersectionObserver();
-  const [headerRef, headerVisible] = useIntersectionObserver();
-  const [filterRef, filterVisible] = useIntersectionObserver();
   const [gridRef, gridVisible] = useIntersectionObserver();
 
-  // Portfolio projects data
-  const portfolioProjects = [
+  const categories = [
+    { id: 'all', name: 'All Projects', icon: '🏠' },
+    { id: 'residential', name: 'Residential', icon: '🏡' },
+    { id: 'commercial', name: 'Commercial', icon: '🏢' },
+    { id: 'luxury', name: 'Luxury', icon: '✨' },
+    { id: 'modern', name: 'Modern', icon: '🎨' }
+  ];
+
+  const projects = [
     {
       id: 1,
-      title: "Modern Living Spaces",
-      category: "residential",
-      description: "Contemporary 3BHK apartment with minimalist design and smart storage solutions",
-      image: "src/assets/images/portfolio1.jpg",
-      beforeImage: "src/assets/images/before1.jpg",
-      client: "Sharma Family",
+      title: "Luxury Villa Interior",
+      category: "luxury",
       location: "Mumbai",
-      year: "2024",
-      area: "1,200 sq ft",
-      duration: "45 days",
-      budget: "₹8,50,000",
-      tags: ["Modern", "Minimalist", "Smart Storage"],
+      area: "3500 sq ft",
+      duration: "75 days",
+      budget: "₹15L - ₹20L",
+      image: "src/assets/images/portfolio1.jpg",
       gallery: [
-        "src/assets/images/gallery1-1.jpg",
-        "src/assets/images/gallery1-2.jpg",
-        "src/assets/images/gallery1-3.jpg"
-      ]
+        "src/assets/images/portfolio1.jpg",
+        "src/assets/images/portfolio1-2.jpg",
+        "src/assets/images/portfolio1-3.jpg"
+      ],
+      description: "A stunning luxury villa featuring contemporary design with traditional elements. Open-plan living spaces with premium materials and smart home integration.",
+      features: ["Smart Home Automation", "Premium Materials", "Custom Furniture", "Landscape Integration"],
+      client: "Mr. & Mrs. Sharma"
     },
     {
       id: 2,
-      title: "Luxury Villa Interior",
-      category: "luxury",
-      description: "Opulent villa design with premium materials and custom furniture",
+      title: "Modern Office Space",
+      category: "commercial",
+      location: "Delhi",
+      area: "2800 sq ft",
+      duration: "45 days",
+      budget: "₹8L - ₹12L",
       image: "src/assets/images/portfolio2.jpg",
-      beforeImage: "src/assets/images/before2.jpg",
-      client: "Patel Residence",
-      location: "Bangalore",
-      year: "2024",
-      area: "3,500 sq ft",
-      duration: "75 days",
-      budget: "₹25,00,000",
-      tags: ["Luxury", "Custom Furniture", "Premium"],
       gallery: [
-        "src/assets/images/gallery2-1.jpg",
-        "src/assets/images/gallery2-2.jpg",
-        "src/assets/images/gallery2-3.jpg"
-      ]
+        "src/assets/images/portfolio2.jpg",
+        "src/assets/images/portfolio2-2.jpg",
+        "src/assets/images/portfolio2-3.jpg"
+      ],
+      description: "Contemporary office design promoting productivity and collaboration. Ergonomic spaces with biophilic design elements and energy-efficient systems.",
+      features: ["Ergonomic Design", "Biophilic Elements", "Energy Efficient", "Collaborative Spaces"],
+      client: "TechCorp Solutions"
     },
     {
       id: 3,
-      title: "Corporate Office Design",
-      category: "commercial",
-      description: "Modern office space designed for productivity and collaboration",
-      image: "src/assets/images/portfolio3.jpg",
-      beforeImage: "src/assets/images/before3.jpg",
-      client: "Tech Solutions Pvt Ltd",
-      location: "Pune",
-      year: "2024",
-      area: "2,800 sq ft",
+      title: "Contemporary Apartment",
+      category: "residential",
+      location: "Bangalore",
+      area: "1800 sq ft",
       duration: "60 days",
-      budget: "₹15,00,000",
-      tags: ["Corporate", "Modern", "Collaborative"],
+      budget: "₹6L - ₹10L",
+      image: "src/assets/images/portfolio3.jpg",
       gallery: [
-        "src/assets/images/gallery3-1.jpg",
-        "src/assets/images/gallery3-2.jpg",
-        "src/assets/images/gallery3-3.jpg"
-      ]
+        "src/assets/images/portfolio3.jpg",
+        "src/assets/images/portfolio3-2.jpg",
+        "src/assets/images/portfolio3-3.jpg"
+      ],
+      description: "A modern 3BHK apartment with minimalist design approach. Space optimization with multi-functional furniture and abundant natural light.",
+      features: ["Space Optimization", "Multi-functional Furniture", "Natural Light", "Minimalist Design"],
+      client: "Ms. Priya Reddy"
     },
     {
       id: 4,
-      title: "Boutique Restaurant",
+      title: "Boutique Hotel Lobby",
       category: "commercial",
-      description: "Intimate dining space with warm ambiance and artistic elements",
+      location: "Goa",
+      area: "1200 sq ft",
+      duration: "30 days",
+      budget: "₹5L - ₹8L",
       image: "src/assets/images/portfolio4.jpg",
-      beforeImage: "src/assets/images/before4.jpg",
-      client: "Spice Garden Restaurant",
-      location: "Delhi",
-      year: "2023",
-      area: "1,800 sq ft",
-      duration: "50 days",
-      budget: "₹12,00,000",
-      tags: ["Restaurant", "Artistic", "Warm Ambiance"],
       gallery: [
-        "src/assets/images/gallery4-1.jpg",
-        "src/assets/images/gallery4-2.jpg",
-        "src/assets/images/gallery4-3.jpg"
-      ]
+        "src/assets/images/portfolio4.jpg",
+        "src/assets/images/portfolio4-2.jpg",
+        "src/assets/images/portfolio4-3.jpg"
+      ],
+      description: "Elegant boutique hotel lobby with coastal influences. Warm materials and textures creating an inviting atmosphere for guests.",
+      features: ["Coastal Theme", "Warm Materials", "Guest Experience", "Local Art Integration"],
+      client: "Serenity Resort"
     },
     {
       id: 5,
-      title: "Traditional Home Makeover",
-      category: "residential",
-      description: "Blend of traditional and contemporary design elements",
+      title: "Modern Farmhouse",
+      category: "modern",
+      location: "Pune",
+      area: "4000 sq ft",
+      duration: "90 days",
+      budget: "₹18L - ₹25L",
       image: "src/assets/images/portfolio5.jpg",
-      beforeImage: "src/assets/images/before5.jpg",
-      client: "Kumar Family",
-      location: "Jaipur",
-      year: "2023",
-      area: "2,200 sq ft",
-      duration: "65 days",
-      budget: "₹18,00,000",
-      tags: ["Traditional", "Contemporary", "Cultural"],
       gallery: [
-        "src/assets/images/gallery5-1.jpg",
-        "src/assets/images/gallery5-2.jpg",
-        "src/assets/images/gallery5-3.jpg"
-      ]
+        "src/assets/images/portfolio5.jpg",
+        "src/assets/images/portfolio5-2.jpg",
+        "src/assets/images/portfolio5-3.jpg"
+      ],
+      description: "A perfect blend of modern aesthetics with farmhouse charm. Sustainable materials and indoor-outdoor living concept.",
+      features: ["Sustainable Materials", "Indoor-Outdoor Living", "Farmhouse Charm", "Modern Aesthetics"],
+      client: "Kumar Family"
     },
     {
       id: 6,
-      title: "Penthouse Paradise",
+      title: "Penthouse Living",
       category: "luxury",
-      description: "Sky-high luxury living with panoramic city views",
-      image: "src/assets/images/portfolio6.jpg",
-      beforeImage: "src/assets/images/before6.jpg",
-      client: "Elite Towers",
-      location: "Mumbai",
-      year: "2023",
-      area: "4,200 sq ft",
-      duration: "90 days",
-      budget: "₹35,00,000",
-      tags: ["Penthouse", "City Views", "Ultra Luxury"],
-      gallery: [
-        "src/assets/images/gallery6-1.jpg",
-        "src/assets/images/gallery6-2.jpg",
-        "src/assets/images/gallery6-3.jpg"
-      ]
-    },
-    {
-      id: 7,
-      title: "Cozy Studio Apartment",
-      category: "residential",
-      description: "Space-efficient design for modern urban living",
-      image: "src/assets/images/portfolio7.jpg",
-      beforeImage: "src/assets/images/before7.jpg",
-      client: "Young Professional",
-      location: "Bangalore",
-      year: "2024",
-      area: "650 sq ft",
-      duration: "30 days",
-      budget: "₹4,50,000",
-      tags: ["Studio", "Space Efficient", "Urban"],
-      gallery: [
-        "src/assets/images/gallery7-1.jpg",
-        "src/assets/images/gallery7-2.jpg",
-        "src/assets/images/gallery7-3.jpg"
-      ]
-    },
-    {
-      id: 8,
-      title: "Hotel Suite Design",
-      category: "commercial",
-      description: "Luxury hotel suite with world-class amenities",
-      image: "src/assets/images/portfolio8.jpg",
-      beforeImage: "src/assets/images/before8.jpg",
-      client: "Grand Plaza Hotel",
-      location: "Goa",
-      year: "2023",
-      area: "800 sq ft",
-      duration: "40 days",
-      budget: "₹10,00,000",
-      tags: ["Hotel", "Luxury", "Hospitality"],
-      gallery: [
-        "src/assets/images/gallery8-1.jpg",
-        "src/assets/images/gallery8-2.jpg",
-        "src/assets/images/gallery8-3.jpg"
-      ]
-    },
-    {
-      id: 9,
-      title: "Smart Home Integration",
-      category: "luxury",
-      description: "Cutting-edge smart home with automated systems",
-      image: "src/assets/images/portfolio9.jpg",
-      beforeImage: "src/assets/images/before9.jpg",
-      client: "Tech Entrepreneur",
       location: "Hyderabad",
-      year: "2024",
-      area: "2,800 sq ft",
-      duration: "70 days",
-      budget: "₹22,00,000",
-      tags: ["Smart Home", "Automation", "Technology"],
+      area: "5000 sq ft",
+      duration: "120 days",
+      budget: "₹30L - ₹40L",
+      image: "src/assets/images/portfolio6.jpg",
       gallery: [
-        "src/assets/images/gallery9-1.jpg",
-        "src/assets/images/gallery9-2.jpg",
-        "src/assets/images/gallery9-3.jpg"
-      ]
+        "src/assets/images/portfolio6.jpg",
+        "src/assets/images/portfolio6-2.jpg",
+        "src/assets/images/portfolio6-3.jpg"
+      ],
+      description: "Ultra-luxury penthouse with panoramic city views. High-end finishes and custom-designed elements throughout.",
+      features: ["Panoramic Views", "High-end Finishes", "Custom Design", "Ultra-luxury"],
+      client: "Mr. Arjun Mehta"
     }
   ];
 
-  // Filter categories
-  const filterCategories = [
-    { key: 'all', label: 'All Projects', icon: TrendingUp },
-    { key: 'residential', label: 'Residential', icon: Users },
-    { key: 'commercial', label: 'Commercial', icon: Award },
-    { key: 'luxury', label: 'Luxury', icon: Sparkles }
-  ];
+  const filteredProjects = activeCategory === 'all' 
+    ? projects 
+    : projects.filter(project => project.category === activeCategory);
 
-  // Filter projects based on active filter
-  useEffect(() => {
-    const filtered = activeFilter === 'all' 
-      ? portfolioProjects 
-      : portfolioProjects.filter(project => project.category === activeFilter);
-    setFilteredProjects(filtered);
-  }, [activeFilter]);
-
-  // Enhanced Project Card Component with advanced animations
-  const ProjectCard = ({ project, index, delay = 0 }) => {
+  // Project Card Component
+  const ProjectCard = ({ project, index, onClick }) => {
     const [cardRef, cardVisible] = useIntersectionObserver();
-    const [imageLoaded, setImageLoaded] = useState(false);
     const isHovered = hoveredProject === project.id;
 
     return (
       <div
         ref={cardRef}
-        className={`group relative bg-white rounded-3xl overflow-hidden shadow-lg border border-gray-100 transform transition-all duration-700 ease-out hover:shadow-2xl hover:-translate-y-3 ${
+        className={`group relative bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:shadow-2xl ${
           cardVisible 
-            ? 'opacity-100 translate-y-0 scale-100' 
-            : 'opacity-0 translate-y-12 scale-95'
+            ? 'opacity-100 translate-y-0' 
+            : 'opacity-0 translate-y-8'
         }`}
-        style={{ 
-          transitionDelay: `${delay}ms`,
-          transformOrigin: 'center bottom'
-        }}
+        style={{ transitionDelay: `${index * 100}ms` }}
+        onClick={() => onClick(project)}
         onMouseEnter={() => setHoveredProject(project.id)}
         onMouseLeave={() => setHoveredProject(null)}
       >
-        {/* Glowing border effect */}
-        <div className={`absolute inset-0 rounded-3xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 opacity-0 group-hover:opacity-20 transition-opacity duration-500 blur-sm -z-10 scale-105`}></div>
-        
-        {/* Image Container with advanced effects */}
-        <div className="relative h-64 lg:h-72 overflow-hidden bg-gray-200">
-          {/* Loading skeleton */}
-          {!imageLoaded && (
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300 animate-pulse">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent animate-shimmer"></div>
-            </div>
-          )}
-          
-          {/* Main project image */}
+        {/* Image Container */}
+        <div className="relative h-64 lg:h-72 overflow-hidden">
           <ImageWithLoading 
             src={project.image} 
             alt={project.title}
-            className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-110 ${
-              imageLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
-            onLoad={() => setImageLoaded(true)}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
           />
           
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          {/* Overlay */}
+          <div className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-300 ${
+            isHovered ? 'opacity-100' : 'opacity-0'
+          }`} />
           
-          {/* Category badge */}
+          {/* Category Badge */}
           <div className="absolute top-4 left-4">
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-sm transition-all duration-300 ${
-              project.category === 'residential' ? 'bg-blue-500/90 text-white' :
-              project.category === 'commercial' ? 'bg-green-500/90 text-white' :
-              'bg-purple-500/90 text-white'
-            } ${isHovered ? 'scale-110 shadow-lg' : ''}`}>
-              {project.category.charAt(0).toUpperCase() + project.category.slice(1)}
+            <span className="bg-white/95 backdrop-blur-sm text-amber-600 px-3 py-1 rounded-full text-sm font-semibold">
+              {categories.find(cat => cat.id === project.category)?.name}
             </span>
           </div>
           
-          {/* Quick action buttons */}
-          <div className={`absolute top-4 right-4 flex gap-2 transform transition-all duration-500 ${
-            isHovered ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'
-          }`}>
-            <button
-              onClick={() => {
-                setLightboxImage(project);
-                setLightboxOpen(true);
-              }}
-              className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-amber-500 hover:text-white transition-all duration-300 transform hover:scale-110 shadow-lg"
-            >
-              <Eye size={16} />
-            </button>
-            <button className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-amber-500 hover:text-white transition-all duration-300 transform hover:scale-110 shadow-lg">
-              <Heart size={16} />
-            </button>
-          </div>
-
-          {/* Floating stats on hover */}
-          <div className={`absolute bottom-4 left-4 right-4 transform transition-all duration-500 ${
+          {/* View Project Button */}
+          <div className={`absolute bottom-4 left-4 right-4 transform transition-all duration-300 ${
             isHovered ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
           }`}>
-            <div className="bg-white/95 backdrop-blur-sm rounded-xl p-3">
-              <div className="flex justify-between items-center text-xs">
-                <div className="text-center">
-                  <div className="font-bold text-amber-600">{project.area}</div>
-                  <div className="text-gray-600">Area</div>
-                </div>
-                <div className="text-center">
-                  <div className="font-bold text-amber-600">{project.duration}</div>
-                  <div className="text-gray-600">Duration</div>
-                </div>
-                <div className="text-center">
-                  <div className="font-bold text-amber-600">{project.budget}</div>
-                  <div className="text-gray-600">Budget</div>
-                </div>
-              </div>
-            </div>
+            <button className="w-full bg-white/95 backdrop-blur-sm text-gray-900 px-4 py-2 rounded-xl font-semibold hover:bg-white transition-colors duration-200 flex items-center justify-center gap-2">
+              <span>View Project</span>
+              <ArrowRight size={16} />
+            </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-6 lg:p-8">
-          {/* Project title and location */}
-          <div className="mb-4">
-            <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2 group-hover:text-amber-600 transition-colors duration-300">
-              {project.title}
-            </h3>
-            <p className="text-gray-600 text-sm font-medium mb-3">
-              📍 {project.location} • {project.year}
-            </p>
-            <p className="text-gray-700 leading-relaxed line-clamp-2">
-              {project.description}
-            </p>
-          </div>
-
-          {/* Tags */}
-          <div className="flex flex-wrap gap-2 mb-6">
-            {project.tags.slice(0, 3).map((tag, tagIndex) => (
-              <span
-                key={tagIndex}
-                className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full group-hover:bg-amber-100 group-hover:text-amber-700 transition-colors duration-300"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-
-          {/* Client info and action */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-amber-100 to-amber-200 rounded-full flex items-center justify-center">
-                <Users size={16} className="text-amber-600" />
-              </div>
-              <div>
-                <div className="font-semibold text-gray-900 text-sm">{project.client}</div>
-                <div className="text-xs text-gray-500">Client</div>
-              </div>
+        <div className="p-6">
+          <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-amber-600 transition-colors duration-300">
+            {project.title}
+          </h3>
+          <p className="text-gray-600 mb-4 line-clamp-2">
+            {project.description}
+          </p>
+          
+          {/* Project Details */}
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-gray-500">Location:</span>
+              <span className="font-medium text-gray-700">📍 {project.location}</span>
             </div>
-            
-            <button className="group/btn bg-gray-100 hover:bg-amber-500 text-gray-700 hover:text-white px-4 py-2 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 text-sm transform hover:scale-105">
-              View Details
-              <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
-            </button>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-500">Area:</span>
+              <span className="font-medium text-gray-700">{project.area}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-500">Duration:</span>
+              <span className="font-medium text-amber-600">{project.duration}</span>
+            </div>
           </div>
         </div>
 
-        {/* Hover reveal: Before/After indicator */}
-        <div className={`absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-amber-400 to-amber-600 transform transition-all duration-500 ${
-          isHovered ? 'scale-x-100' : 'scale-x-0'
-        }`}></div>
+        {/* Decorative elements */}
+        <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-amber-200 to-amber-300 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+        <div className="absolute -bottom-2 -left-2 w-6 h-6 bg-gradient-to-br from-blue-200 to-purple-200 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
       </div>
     );
   };
 
-  // Enhanced Lightbox Component
-  const Lightbox = ({ isOpen, project, onClose }) => {
-    if (!isOpen || !project) return null;
+  // Project Modal Component
+  const ProjectModal = ({ project, onClose }) => {
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+    if (!project) return null;
 
     return (
-      <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-        <div className="max-w-6xl w-full max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-2xl transform transition-all duration-500">
-          {/* Lightbox Header */}
-          <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+      <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto transform transition-all duration-300">
+          {/* Modal Header */}
+          <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center z-10">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">{project.title}</h2>
-              <p className="text-gray-600">{project.location} • {project.year}</p>
+              <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">{project.title}</h2>
+              <p className="text-amber-600 font-medium">{project.location} • {project.area}</p>
             </div>
             <button
               onClick={onClose}
-              className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors duration-200"
+              className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
             >
-              <X size={20} />
+              <X size={24} />
             </button>
           </div>
 
-          {/* Lightbox Content */}
-          <div className="p-6">
-            {/* Before/After Comparison */}
-            <div className="grid md:grid-cols-2 gap-6 mb-8">
-              <div>
-                <h3 className="text-lg font-semibold mb-3 text-gray-800">Before</h3>
-                <div className="rounded-2xl overflow-hidden shadow-lg">
-                  <ImageWithLoading 
-                    src={project.beforeImage} 
-                    alt={`${project.title} - Before`}
-                    className="w-full h-64 object-cover"
-                  />
+          {/* Image Gallery */}
+          <div className="relative h-64 lg:h-96">
+            <ImageWithLoading 
+              src={project.gallery[currentImageIndex]} 
+              alt={`${project.title} - Image ${currentImageIndex + 1}`}
+              className="w-full h-full object-cover"
+            />
+            
+            {/* Image Navigation */}
+            {project.gallery.length > 1 && (
+              <>
+                <button
+                  onClick={() => setCurrentImageIndex(prev => 
+                    prev === 0 ? project.gallery.length - 1 : prev - 1
+                  )}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-900 p-2 rounded-full transition-colors duration-200"
+                >
+                  <ChevronRight size={20} className="rotate-180" />
+                </button>
+                <button
+                  onClick={() => setCurrentImageIndex(prev => 
+                    prev === project.gallery.length - 1 ? 0 : prev + 1
+                  )}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-900 p-2 rounded-full transition-colors duration-200"
+                >
+                  <ChevronRight size={20} />
+                </button>
+                
+                {/* Image Indicators */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+                  {project.gallery.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentImageIndex(index)}
+                      className={`w-2 h-2 rounded-full transition-colors duration-200 ${
+                        index === currentImageIndex ? 'bg-white' : 'bg-white/40'
+                      }`}
+                    />
+                  ))}
                 </div>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold mb-3 text-amber-600">After</h3>
-                <div className="rounded-2xl overflow-hidden shadow-lg">
-                  <ImageWithLoading 
-                    src={project.image} 
-                    alt={`${project.title} - After`}
-                    className="w-full h-64 object-cover"
-                  />
-                </div>
-              </div>
+              </>
+            )}
+          </div>
+
+          {/* Project Details */}
+          <div className="p-6 space-y-6">
+            {/* Description */}
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Project Overview</h3>
+              <p className="text-gray-700 leading-relaxed">{project.description}</p>
             </div>
 
-            {/* Project Details */}
-            <div className="grid md:grid-cols-2 gap-8 mb-8">
-              <div>
-                <h3 className="text-lg font-semibold mb-4 text-gray-800">Project Details</h3>
-                <div className="space-y-3">
+            {/* Project Info Grid */}
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Project Details */}
+              <div className="bg-gray-50 p-4 rounded-xl">
+                <h4 className="font-bold text-gray-900 mb-3">Project Details</h4>
+                <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Client:</span>
-                    <span className="font-semibold">{project.client}</span>
+                    <span className="font-medium text-gray-900">{project.client}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Location:</span>
-                    <span className="font-semibold">{project.location}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Year:</span>
-                    <span className="font-semibold">{project.year}</span>
+                    <span className="font-medium text-gray-900">{project.location}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Area:</span>
-                    <span className="font-semibold">{project.area}</span>
+                    <span className="font-medium text-gray-900">{project.area}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Duration:</span>
-                    <span className="font-semibold">{project.duration}</span>
+                    <span className="font-medium text-amber-600">{project.duration}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Budget:</span>
-                    <span className="font-semibold text-amber-600">{project.budget}</span>
+                    <span className="font-medium text-green-600">{project.budget}</span>
                   </div>
                 </div>
               </div>
-              
-              <div>
-                <h3 className="text-lg font-semibold mb-4 text-gray-800">Description</h3>
-                <p className="text-gray-700 leading-relaxed mb-4">{project.description}</p>
-                
-                <h4 className="font-semibold mb-2 text-gray-800">Key Features:</h4>
-                <div className="flex flex-wrap gap-2">
-                  {project.tags.map((tag, index) => (
-                    <span
-                      key={index}
-                      className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-sm font-medium"
-                    >
-                      {tag}
-                    </span>
+
+              {/* Key Features */}
+              <div className="bg-amber-50 p-4 rounded-xl">
+                <h4 className="font-bold text-gray-900 mb-3">Key Features</h4>
+                <div className="space-y-2">
+                  {project.features.map((feature, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <CheckCircle2 size={16} className="text-amber-500 flex-shrink-0" />
+                      <span className="text-sm text-gray-700">{feature}</span>
+                    </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            {/* Gallery */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4 text-gray-800">Project Gallery</h3>
-              <div className="grid md:grid-cols-3 gap-4">
-                {project.gallery.map((image, index) => (
-                  <div key={index} className="rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
-                    <ImageWithLoading 
-                      src={image} 
-                      alt={`${project.title} - Gallery ${index + 1}`}
-                      className="w-full h-40 object-cover hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                ))}
-              </div>
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-200">
+              <button
+                onClick={() => {
+                  onClose();
+                  // Trigger quote form
+                  document.dispatchEvent(new CustomEvent('openQuoteForm'));
+                }}
+                className="flex-1 bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-xl font-semibold transition-colors duration-200 flex items-center justify-center gap-2"
+              >
+                <span>Start Similar Project</span>
+                <ArrowRight size={16} />
+              </button>
+              <button
+                onClick={onClose}
+                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-xl font-semibold transition-colors duration-200"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
@@ -878,161 +752,114 @@ const PortfolioSection = () => {
   };
 
   return (
-    <section id="portfolio" className="py-16 lg:py-24 bg-gradient-to-br from-gray-50 via-white to-amber-50 overflow-hidden relative">
+    <section id="portfolio" className="py-16 lg:py-24 bg-gradient-to-br from-white via-gray-50 to-amber-50 overflow-hidden">
       {/* Background Decorations */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-amber-200 to-amber-300 rounded-full opacity-5 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-60 h-60 bg-gradient-to-br from-blue-200 to-purple-300 rounded-full opacity-5 animate-bounce-slow"></div>
-        <div className="absolute top-1/3 left-1/4 w-32 h-32 bg-gradient-to-br from-purple-200 to-pink-200 rounded-full opacity-3 animate-spin-slow"></div>
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-amber-200 to-amber-300 rounded-full opacity-5 animate-pulse" />
+        <div className="absolute -bottom-40 -left-40 w-60 h-60 bg-gradient-to-br from-blue-200 to-purple-300 rounded-full opacity-5 animate-bounce-slow" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 lg:px-8 relative z-10">
         {/* Section Header */}
-        <div ref={headerRef} className="text-center mb-16">
+        <div ref={sectionRef} className="text-center mb-16">
           <div className={`transform transition-all duration-1000 ${
-            headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}>
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800 px-5 py-2 rounded-full text-sm font-semibold mb-6 shadow-sm">
-              <Award size={16} className="fill-current animate-pulse" />
+            <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+              <Sparkles size={16} className="fill-current" />
               Our Portfolio
             </div>
             <h2 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              Our Beautiful
-              <span className="block text-amber-600">Design Projects</span>
+              Transformative Spaces
+              <span className="block text-amber-600">We've Created</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Explore our diverse portfolio of stunning interior designs that showcase our expertise and creativity
+              Explore our diverse collection of interior design projects that showcase innovation, elegance, and exceptional craftsmanship
             </p>
           </div>
         </div>
 
-        {/* Filter Buttons */}
-        <div ref={filterRef} className={`transform transition-all duration-1000 delay-300 ${
-          filterVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        {/* Category Filter */}
+        <div className={`flex flex-wrap justify-center gap-3 mb-12 transform transition-all duration-1000 delay-200 ${
+          sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
-            {filterCategories.map((category) => {
-              const Icon = category.icon;
-              return (
-                <button
-                  key={category.key}
-                  onClick={() => setActiveFilter(category.key)}
-                  className={`group flex items-center gap-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 ${
-                    activeFilter === category.key
-                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg scale-105'
-                      : 'bg-white text-gray-700 hover:bg-amber-50 hover:text-amber-600 shadow-md'
-                  }`}
-                >
-                  <Icon size={18} className={`transition-transform duration-300 ${
-                    activeFilter === category.key ? 'scale-110' : 'group-hover:scale-110'
-                  }`} />
-                  {category.label}
-                  {activeFilter === category.key && (
-                    <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+          {categories.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => setActiveCategory(category.id)}
+              className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${
+                activeCategory === category.id
+                  ? 'bg-amber-500 text-white shadow-lg scale-105'
+                  : 'bg-white text-gray-700 hover:bg-amber-100 hover:text-amber-700 shadow-sm hover:shadow-md'
+              }`}
+            >
+              <span>{category.icon}</span>
+              <span>{category.name}</span>
+            </button>
+          ))}
         </div>
 
         {/* Projects Grid */}
-        <div ref={gridRef} className={`transform transition-all duration-1000 delay-500 ${
+        <div ref={gridRef} className={`transform transition-all duration-1000 delay-400 ${
           gridVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
-          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8 lg:gap-10 mb-12">
-            {filteredProjects.slice(0, visibleProjects).map((project, index) => (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+            {filteredProjects.map((project, index) => (
               <ProjectCard
-                key={`${project.id}-${activeFilter}`}
+                key={project.id}
                 project={project}
                 index={index}
-                delay={index * 100}
+                onClick={setSelectedProject}
               />
             ))}
           </div>
-
-          {/* Load More Button */}
-          {visibleProjects < filteredProjects.length && (
-            <div className="text-center">
-              <button
-                onClick={() => setVisibleProjects(prev => prev + 3)}
-                className="group bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center gap-3 mx-auto"
-              >
-                Load More Projects
-                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform duration-300" />
-              </button>
-            </div>
-          )}
         </div>
 
-        {/* Portfolio Stats */}
-        <div className="mt-20 bg-gradient-to-r from-slate-600 to-slate-700 rounded-3xl p-8 lg:p-12 shadow-xl">
-          <div className="text-center mb-8">
+        {/* Call to Action */}
+        <div className={`text-center mt-16 transform transition-all duration-1000 delay-600 ${
+          gridVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        }`}>
+          <div className="bg-gradient-to-r from-slate-600 to-slate-700 rounded-3xl p-8 lg:p-12 shadow-xl">
             <h3 className="text-3xl lg:text-4xl font-bold text-white mb-4">
-              Portfolio Highlights
+              Ready to Create Your Dream Space?
             </h3>
-            <p className="text-slate-200 text-lg max-w-2xl mx-auto">
-              Our portfolio represents years of dedication to creating exceptional spaces
+            <p className="text-slate-200 text-lg mb-8 max-w-2xl mx-auto">
+              Let's discuss your vision and transform it into a beautiful reality with our expert design team
             </p>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="text-center group">
-              <div className="text-3xl lg:text-4xl font-bold text-amber-400 mb-2">
-                <StatCounter end={150} suffix="+" duration={2000} />
-              </div>
-              <p className="text-slate-200 font-medium group-hover:text-white transition-colors duration-300">
-                Completed Projects
-              </p>
-            </div>
-            <div className="text-center group">
-              <div className="text-3xl lg:text-4xl font-bold text-amber-400 mb-2">
-                <StatCounter end={25} suffix="+" duration={2200} />
-              </div>
-              <p className="text-slate-200 font-medium group-hover:text-white transition-colors duration-300">
-                Awards Won
-              </p>
-            </div>
-            <div className="text-center group">
-              <div className="text-3xl lg:text-4xl font-bold text-amber-400 mb-2">
-                <StatCounter end={98} suffix="%" duration={2400} />
-              </div>
-              <p className="text-slate-200 font-medium group-hover:text-white transition-colors duration-300">
-                Client Satisfaction
-              </p>
-            </div>
-            <div className="text-center group">
-              <div className="text-3xl lg:text-4xl font-bold text-amber-400 mb-2">
-                <StatCounter end={50} suffix="+" duration={2600} />
-              </div>
-              <p className="text-slate-200 font-medium group-hover:text-white transition-colors duration-300">
-                Cities Covered
-              </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={() => document.dispatchEvent(new CustomEvent('openQuoteForm'))}
+                className="bg-amber-500 hover:bg-amber-600 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2"
+              >
+                <span>Start Your Project</span>
+                <ArrowRight size={18} />
+              </button>
+              <button
+                onClick={() => document.querySelector('#about')?.scrollIntoView({ behavior: 'smooth' })}
+                className="border-2 border-slate-400 hover:border-white text-slate-200 hover:text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg"
+              >
+                Learn More About Us
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Lightbox */}
-      <Lightbox 
-        isOpen={lightboxOpen} 
-        project={lightboxImage} 
-        onClose={() => {
-          setLightboxOpen(false);
-          setLightboxImage(null);
-        }} 
+      {/* Project Modal */}
+      <ProjectModal 
+        project={selectedProject} 
+        onClose={() => setSelectedProject(null)} 
       />
 
-      {/* Enhanced CSS */}
+      {/* Custom Animations */}
       <style jsx>{`
-        @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
+        @keyframes bounce-slow {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
         }
         
-        .animate-shimmer {
-          animation: shimmer 1.5s infinite;
+        .animate-bounce-slow {
+          animation: bounce-slow 3s ease-in-out infinite;
         }
         
         .line-clamp-2 {
@@ -1041,30 +868,10 @@ const PortfolioSection = () => {
           -webkit-box-orient: vertical;
           overflow: hidden;
         }
-        
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        
-        @keyframes bounce-slow {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-12px); }
-        }
-        
-        .animate-spin-slow {
-          animation: spin-slow 20s linear infinite;
-        }
-        
-        .animate-bounce-slow {
-          animation: bounce-slow 4s ease-in-out infinite;
-        }
       `}</style>
     </section>
   );
 };
-
-
 
 // Enhanced Testimonials Section with 6 Cards and Premium Effects
 // Fixed Testimonials Section with Better Hover Effects - UPDATED COLORS
@@ -1529,6 +1336,568 @@ const TestimonialsSection = () => {
   );
 };
 
+const FAQSection = () => {
+  const [openFAQ, setOpenFAQ] = useState(null);
+  const [sectionRef, sectionVisible] = useIntersectionObserver();
+
+  const faqCategories = [
+    {
+      title: "Services & Expertise",
+      icon: "🎨",
+      questions: [
+        {
+          question: "What interior design services do you offer?",
+          answer: "We provide comprehensive interior design services including space planning, color consultation, furniture selection, lighting design, custom millwork, project management, and complete home makeovers. We work on both residential and commercial projects."
+        },
+        {
+          question: "Do you specialize in any particular design style?",
+          answer: "We specialize in modern, contemporary, and luxury design styles, but we adapt to your personal preferences. Our portfolio includes minimalist, transitional, and eclectic designs tailored to each client's unique taste."
+        },
+        {
+          question: "Is there a minimum project size you work with?",
+          answer: "We work with projects starting from ₹3L and above. This ensures we can dedicate proper attention and resources to deliver exceptional results for every client."
+        }
+      ]
+    },
+    {
+      title: "Process & Timeline",
+      icon: "⚡",
+      questions: [
+        {
+          question: "What's the first step to working with you?",
+          answer: "Start with our free consultation where we discuss your vision, budget, and timeline. We'll assess if we're a good fit and provide you with a detailed proposal outlining our approach and investment."
+        },
+        {
+          question: "How long does a typical project take?",
+          answer: "Project timelines vary based on scope: Small rooms (2-4 weeks), Full apartments (6-10 weeks), Large homes (3-6 months). We provide detailed timelines during our initial consultation."
+        },
+        {
+          question: "Will I see designs before you start ordering?",
+          answer: "Absolutely! We present detailed mood boards, 3D renderings, and material samples for your approval before any purchases. We ensure you love every detail before moving forward."
+        }
+      ]
+    },
+    {
+      title: "Pricing & Investment",
+      icon: "💰",
+      questions: [
+        {
+          question: "How much does interior design cost?",
+          answer: "Our projects typically range from ₹3L to ₹50L+ depending on scope and finishes. We offer transparent pricing with detailed breakdowns during consultation. Payment plans are available for larger projects."
+        },
+        {
+          question: "How do you structure your fees?",
+          answer: "We charge a design fee (20-30% of total project cost) plus the cost of furniture, materials, and installation. Our fee covers design development, project management, and coordination with all vendors."
+        },
+        {
+          question: "Are consultations free?",
+          answer: "Yes! We offer a complimentary 60-minute consultation to discuss your project, assess your space, and determine if we're the right fit for your needs."
+        }
+      ]
+    },
+    {
+      title: "Logistics & Support",
+      icon: "🔧",
+      questions: [
+        {
+          question: "Do you work outside your local area?",
+          answer: "We primarily serve Mumbai, Delhi, Bangalore, and surrounding areas. For projects outside these locations, we offer virtual design consultations and can work with local contractors."
+        },
+        {
+          question: "Who purchases the furniture and materials?",
+          answer: "We handle all procurement through our trusted vendor network, ensuring quality control and competitive pricing. You'll approve all selections before any orders are placed."
+        },
+        {
+          question: "What if I'm not happy with the final result?",
+          answer: "Client satisfaction is our priority. We include revisions in our process and maintain open communication throughout. If issues arise, we'll work together to find solutions that meet your expectations."
+        }
+      ]
+    }
+  ];
+
+  const toggleFAQ = (categoryIndex, questionIndex) => {
+    const key = `${categoryIndex}-${questionIndex}`;
+    setOpenFAQ(openFAQ === key ? null : key);
+  };
+
+  return (
+    <section id="faq" className="py-16 lg:py-24 bg-gradient-to-br from-slate-50 via-white to-amber-50">
+      <div className="max-w-6xl mx-auto px-4 lg:px-8">
+        {/* Section Header */}
+        <div ref={sectionRef} className="text-center mb-16">
+          <div className={`transform transition-all duration-1000 ${
+            sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}>
+            <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+              <HelpCircle size={16} />
+              Frequently Asked Questions
+            </div>
+            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+              Everything You Need
+              <span className="block text-amber-600">To Know</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Get instant answers to the most common questions about our interior design process, pricing, and services
+            </p>
+          </div>
+        </div>
+
+        {/* FAQ Categories */}
+        <div className="grid lg:grid-cols-2 gap-8">
+          {faqCategories.map((category, categoryIndex) => (
+            <div
+              key={categoryIndex}
+              className={`transform transition-all duration-1000 delay-${(categoryIndex + 1) * 100} ${
+                sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+              }`}
+            >
+              {/* Category Header */}
+              <div className="bg-white rounded-t-2xl border-l-4 border-amber-500 p-6 shadow-lg">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{category.icon}</span>
+                  <h3 className="text-xl font-bold text-gray-900">{category.title}</h3>
+                </div>
+              </div>
+
+              {/* Questions */}
+              <div className="bg-white border-l-4 border-amber-500 shadow-lg rounded-b-2xl overflow-hidden">
+                {category.questions.map((faq, questionIndex) => {
+                  const isOpen = openFAQ === `${categoryIndex}-${questionIndex}`;
+                  
+                  return (
+                    <div key={questionIndex} className="border-b border-gray-100 last:border-b-0">
+                      <button
+                        onClick={() => toggleFAQ(categoryIndex, questionIndex)}
+                        className="w-full text-left p-6 hover:bg-gray-50 transition-colors duration-200 flex items-center justify-between group"
+                      >
+                        <span className="font-semibold text-gray-900 group-hover:text-amber-600 transition-colors duration-200">
+                          {faq.question}
+                        </span>
+                        <ChevronRight 
+                          size={20} 
+                          className={`text-amber-500 transition-transform duration-300 ${
+                            isOpen ? 'rotate-90' : ''
+                          }`} 
+                        />
+                      </button>
+                      
+                      <div className={`overflow-hidden transition-all duration-300 ${
+                        isOpen ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'
+                      }`}>
+                        <div className="px-6 pb-6">
+                          <p className="text-gray-700 leading-relaxed">{faq.answer}</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA Section */}
+        <div className={`text-center mt-16 transform transition-all duration-1000 delay-600 ${
+          sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        }`}>
+          <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-3xl p-8 shadow-xl">
+            <h3 className="text-2xl lg:text-3xl font-bold text-white mb-4">
+              Still Have Questions?
+            </h3>
+            <p className="text-amber-100 text-lg mb-6 max-w-2xl mx-auto">
+              We're here to help! Get in touch for a personalized consultation about your interior design project.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button 
+                onClick={() => setFormOpen(true)}
+                className="bg-white text-amber-600 px-8 py-3 rounded-xl font-semibold hover:bg-amber-50 transition-colors duration-200 flex items-center justify-center gap-2"
+              >
+                <MessageCircle size={18} />
+                <span>Start Free Consultation</span>
+              </button>
+              <a 
+                href="tel:+919876543210"
+                className="border-2 border-white text-white hover:bg-white hover:text-amber-600 px-8 py-3 rounded-xl font-semibold transition-colors duration-200 flex items-center justify-center gap-2"
+              >
+                <Phone size={18} />
+                <span>Call Us Directly</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// Footer Section Component with modern theme matching
+const FooterSection = () => {
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [sectionRef, sectionVisible] = useIntersectionObserver();
+
+  // Show/hide back to top button based on scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.pageYOffset > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleBackToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
+  const handleNavClick = (href) => {
+    const element = document.querySelector(href);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Navigation to Google Maps
+  const handleNavigateToLocation = () => {
+    const address = "123 Design Avenue, Mumbai, Maharashtra 400001";
+    const encodedAddress = encodeURIComponent(address);
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`, '_blank');
+  };
+
+  const handleOpenInGoogleMaps = () => {
+    const address = "123 Design Avenue, Mumbai, Maharashtra 400001";
+    const encodedAddress = encodeURIComponent(address);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+  };
+
+  // Footer data
+  const footerLinks = {
+    company: [
+        { name: 'Home', href: '#home', isButton: false },
+        { name: 'How It Works', href: '#how-it-works', isButton: false },
+        { name: 'About', href: '#about', isButton: false },
+        { name: 'Portfolio', href: '#portfolio', isButton: false },
+        { name: 'Testimonials', href: '#testimonials', isButton: false },
+        { name: 'FAQ', href: '#faq', isButton: false },
+        { name: 'Get Quote', href: '#get-quote', isButton: true },
+    ],
+    services: [
+      { name: 'Residential Design', href: '#services' },
+      { name: 'Commercial Design', href: '#services' },
+      { name: 'Space Planning', href: '#services' },
+      { name: 'Furniture Selection', href: '#services' },
+      { name: 'Consultation', href: '#services' }
+    ],
+    resources: [
+      { name: 'Design Blog', href: '#blog' },
+      { name: 'Interior Tips', href: '#tips' },
+      { name: 'Style Guide', href: '#guide' },
+      { name: 'Maintenance', href: '#maintenance' },
+      { name: 'Warranty', href: '#warranty' }
+    ]
+  };
+
+  const contactInfo = [
+    { 
+      icon: <MapPin size={18} className="text-amber-400" />, 
+      text: '123 Design Avenue, Mumbai, Maharashtra 400001',
+      action: handleOpenInGoogleMaps,
+      type: 'location'
+    },
+    { 
+      icon: <Phone size={18} className="text-amber-400" />, 
+      text: '+91 98765 43210',
+      action: () => window.open('tel:+919876543210'),
+      type: 'phone'
+    },
+    { 
+      icon: <Mail size={18} className="text-amber-400" />, 
+      text: 'hello@swagruhainteriors.com',
+      action: () => window.open('mailto:hello@swagruhainteriors.com'),
+      type: 'email'
+    },
+    { 
+      icon: <Clock size={18} className="text-amber-400" />, 
+      text: 'Mon - Sat: 9:00 AM - 7:00 PM',
+      type: 'hours'
+    }
+  ];
+
+  const socialLinks = [
+    { 
+      name: 'Facebook', 
+      icon: <Instagram size={20} />, 
+      href: 'https://facebook.com/swagruhainteriors',
+      color: 'hover:bg-blue-600'
+    },
+    { 
+      name: 'Instagram', 
+      icon: <Instagram size={20} />, 
+      href: 'https://instagram.com/swagruhainteriors',
+      color: 'hover:bg-pink-600'
+    },
+    { 
+      name: 'Twitter', 
+      icon: <Twitter size={20} />, 
+      href: 'https://twitter.com/swagruhainteriors',
+      color: 'hover:bg-blue-500'
+    },
+    { 
+      name: 'LinkedIn', 
+      icon: <Linkedin size={20} />, 
+      href: 'https://linkedin.com/company/swagruhainteriors',
+      color: 'hover:bg-blue-700'
+    }
+  ];
+
+  const achievements = [
+    { number: '500+', label: 'Projects Completed' },
+    { number: '50+', label: 'Happy Clients' },
+    { number: '15+', label: 'Years Experience' },
+    { number: '25+', label: 'Design Awards' }
+  ];
+
+  return (
+    <>
+      <footer className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden">
+        {/* Background Decorations */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-amber-500/10 to-amber-600/5 rounded-full blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 w-60 h-60 bg-gradient-to-br from-slate-600/10 to-slate-700/5 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-amber-500/5 to-transparent rounded-full blur-3xl" />
+        </div>
+
+        <div className="relative z-10">
+          {/* Newsletter Section */}
+          <div className="bg-gradient-to-r bg-slate-700 py-12">
+            <div className="max-w-7xl mx-auto px-4 lg:px-8">
+              <div className="text-center">
+                <h3 className="text-2xl lg:text-3xl font-bold text-white mb-4">
+                  Stay Updated with Our Latest Designs
+                </h3>
+                <p className="text-blue-100 text-lg mb-8 max-w-2xl mx-auto">
+                  Subscribe to our newsletter for interior design tips, trends, and exclusive project showcases
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
+                  <input
+                    type="email"
+                    placeholder="Enter your email address"
+                    className="flex-1 px-6 py-3 rounded-xl bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white"
+                  />
+                  <button className="bg-slate-800 hover:bg-slate-700 text-white px-8 py-3 rounded-xl font-semibold transition-colors duration-200 flex items-center justify-center gap-2">
+                    <span>Subscribe</span>
+                    <ArrowRight size={16} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Footer Content */}
+          <div ref={sectionRef} className="max-w-7xl mx-auto px-4 lg:px-8 py-16">
+            <div className={`grid lg:grid-cols-4 md:grid-cols-2 gap-8 lg:gap-12 transform transition-all duration-1000 ${
+              sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}>
+              
+              {/* Company Info */}
+              <div className="lg:col-span-1 space-y-6">
+                <div>
+                  <h3 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                    <Sparkles className="text-amber-500" size={24} />
+                    Swagruha Interiors
+                  </h3>
+                  <p className="text-slate-300 leading-relaxed mb-6">
+                    Transforming spaces into beautiful, functional environments that reflect your unique style and personality. 
+                    Experience luxury living with our expert interior design services.
+                  </p>
+                  
+                  {/* Social Links */}
+                  <div className="flex gap-3">
+                    {socialLinks.map((social) => (
+                      <a
+                        key={social.name}
+                        href={social.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`w-10 h-10 bg-slate-700 ${social.color} text-white rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg`}
+                        title={social.name}
+                      >
+                        {social.icon}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Achievements */}
+                <div className="grid grid-cols-2 gap-4">
+                  {achievements.map((achievement, index) => (
+                    <div key={index} className="text-center">
+                      <div className="text-2xl font-bold text-amber-500">{achievement.number}</div>
+                      <div className="text-xs text-slate-400">{achievement.label}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quick Links */}
+              <div>
+                <h4 className="text-lg font-bold text-white mb-6">Company</h4>
+                <ul className="space-y-3">
+                  {footerLinks.company.map((link) => (
+                    <li key={link.name}>
+                      <a
+                        href={link.href}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleNavClick(link.href);
+                        }}
+                        className="text-slate-300 hover:text-amber-400 transition-colors duration-200 cursor-pointer flex items-center gap-2 group"
+                      >
+                        <ChevronRight size={14} className="text-amber-500 group-hover:translate-x-1 transition-transform duration-200" />
+                        {link.name}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Services */}
+              <div>
+                <h4 className="text-lg font-bold text-white mb-6">Our Services</h4>
+                <ul className="space-y-3">
+                  {footerLinks.services.map((link) => (
+                    <li key={link.name}>
+                      <a
+                        href={link.href}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleNavClick(link.href);
+                        }}
+                        className="text-slate-300 hover:text-amber-400 transition-colors duration-200 cursor-pointer flex items-center gap-2 group"
+                      >
+                        <ChevronRight size={14} className="text-amber-500 group-hover:translate-x-1 transition-transform duration-200" />
+                        {link.name}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Contact Info */}
+              <div>
+                <h4 className="text-lg font-bold text-white mb-6">Get In Touch</h4>
+                <div className="space-y-4">
+                  {contactInfo.map((contact, index) => (
+                    <div 
+                      key={index} 
+                      className={`flex items-start gap-3 ${
+                        contact.action ? 'cursor-pointer hover:text-amber-400 transition-colors duration-200' : ''
+                      }`}
+                      onClick={contact.action}
+                    >
+                      <div className="flex-shrink-0 mt-1">
+                        {contact.icon}
+                      </div>
+                      <span className="text-slate-300 text-sm leading-relaxed">
+                        {contact.text}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Quick Contact Buttons */}
+                <div className="mt-6 flex flex-col gap-3">
+                  <button 
+                    onClick={() => window.open('tel:+919876543210')}
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 flex items-center justify-center gap-2"
+                  >
+                    <Phone size={16} />
+                    Call Now
+                  </button>
+                  <button 
+                    onClick={() => window.open('https://wa.me/919876543210')}
+                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 flex items-center justify-center gap-2"
+                  >
+                    <MessageCircle size={16} />
+                    WhatsApp
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Map Section */}
+            <div className={`mt-12 transform transition-all duration-1000 delay-300 ${
+              sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}>
+              <h4 className="text-2xl font-bold text-white mb-6 text-center">Visit Our Factory</h4>
+              <div className="bg-slate-800 rounded-2xl p-6 shadow-xl">
+                <div className="relative rounded-xl overflow-hidden">
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3771.2573267487716!2d72.8776559148707!3d19.076090387093268!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be7c8c6b3fa7b7b%3A0x9d9d9d9d9d9d9d9d!2sSwagruha%20Interiors!5e0!3m2!1sen!2sin!4v1647887654321!5m2!1sen!2sin"
+                    className="w-full h-64 lg:h-80 border-0 rounded-xl"
+                    allowFullScreen=""
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Our Office Location"
+                  />
+                  
+                  {/* Map Overlay Buttons */}
+                  <div className="absolute bottom-4 right-4 flex gap-2">
+                    <button
+                      onClick={handleNavigateToLocation}
+                      className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 shadow-lg hover:scale-105"
+                    >
+                      <Navigation size={16} />
+                      Navigate
+                    </button>
+                    <button
+                      onClick={handleOpenInGoogleMaps}
+                      className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 shadow-lg hover:scale-105"
+                    >
+                      <MapPin size={16} />
+                      View in Maps
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer Bottom */}
+          <div className="border-t border-slate-700 bg-slate-900 flex">
+            <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8">
+              <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
+                <div className="text-slate-400 text-sm text-center lg:text-left">
+                  © 2024 Swagruha Interiors. All rights reserved. | Designed with ❤️ for beautiful spaces
+                </div>
+                {/* <div className="flex flex-wrap justify-center gap-6 text-slate-400 text-sm">
+                  <a href="#privacy" className="hover:text-amber-400 transition-colors duration-200">Privacy Policy</a>
+                  <a href="#terms" className="hover:text-amber-400 transition-colors duration-200">Terms of Service</a>
+                  <a href="#cookies" className="hover:text-amber-400 transition-colors duration-200">Cookie Policy</a>
+                  <a href="#sitemap" className="hover:text-amber-400 transition-colors duration-200">Sitemap</a>
+                </div> */}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Back to Top Button */}
+        <button
+          className={`fixed bottom-8 right-8 w-12 h-12 bg-amber-500 hover:bg-amber-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 z-50 flex items-center justify-center group ${
+            showBackToTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+          }`}
+          onClick={handleBackToTop}
+          title="Back to Top"
+        >
+          <ChevronRight size={20} className="rotate-[-90deg] group-hover:translate-y-[-2px] transition-transform duration-200" />
+        </button>
+      </footer>
+    </>
+  );
+};
+
 // Connect With Us Modal Component
 const ConnectWithUsModal = ({ isOpen, onClose }) => {
   const socialLinks = [
@@ -1691,6 +2060,8 @@ const Landing = () => {
     { name: 'How It Works', href: '#how-it-works', isButton: false },
     { name: 'About', href: '#about', isButton: false },
     { name: 'Portfolio', href: '#portfolio', isButton: false },
+    { name: 'Testimonials', href: '#testimonials', isButton: false },
+    { name: 'FAQ', href: '#faq', isButton: false },
     { name: 'Get Quote', href: '#get-quote', isButton: true },
   ];
 
@@ -1996,17 +2367,26 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* About Section */}
-      <AboutSection />
+    {/* About Section */}
+    <AboutSection />
 
-      {/* Testimonials Section */}
-        <TestimonialsSection />
+    {/* Portfolio Section - ADD THIS */}
+    <PortfolioSection />
 
-      {/* Connect With Us Modal */}
-      <ConnectWithUsModal 
+    {/* Testimonials Section */}
+    <TestimonialsSection />
+
+    {/* FAQ Section - ADD THIS LINE */}
+    <FAQSection />
+
+    {/* Footer Section - ADD THIS */}
+    <FooterSection />
+
+    {/* Connect With Us Modal */}
+    <ConnectWithUsModal 
         isOpen={connectModalOpen} 
         onClose={() => setConnectModalOpen(false)} 
-      />
+    />
 
       {/* Quote Form Modal */}
       {formOpen && (
