@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import QuoteForm from "./QuoteFormModal.jsx";
 import { Phone, Menu, X, ChevronRight, Star, CheckCircle, Instagram, Twitter, Linkedin, Mail, MessageCircle, Users, Award, Heart, TrendingUp, CheckCircle2, Sparkles, ArrowRight, HelpCircle, MapPin, Clock, Navigation, AlertCircle  } from 'lucide-react';
 
 // Optimized Intersection Observer Hook with throttling
