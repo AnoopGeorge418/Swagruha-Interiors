@@ -183,7 +183,7 @@ const ProcessCard = ({ stepNumber, heading, description, images, isReversed = fa
   );
 };
 
-// About Section Component
+// About Section Component - UPDATED with new colors
 const AboutSection = () => {
   const [titleRef, titleVisible] = useIntersectionObserver();
   const [contentRef, contentVisible] = useIntersectionObserver();
@@ -339,15 +339,15 @@ const AboutSection = () => {
           </div>
         </div>
 
-        {/* Stats Section */}
-        <div ref={statsRef} className={`bg-gradient-to-r from-orange-200 to-orange-300 rounded-3xl p-8 lg:p-12 transform transition-all duration-1000 ${
+        {/* Stats Section - UPDATED COLORS */}
+        <div ref={statsRef} className={`bg-gradient-to-r from-slate-500 to-slate-600 rounded-3xl p-8 lg:p-12 transform transition-all duration-1000 ${
           statsVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
         }`}>
           <div className="text-center mb-8">
-            <h3 className="text-3xl lg:text-4xl font-bold text-gray-500 mb-4">
+            <h3 className="text-3xl lg:text-4xl font-bold text-white mb-4">
               Our Journey in Numbers
             </h3>
-            <p className="text-gray-500 text-lg max-w-2xl mx-auto">
+            <p className="text-slate-200 text-lg max-w-2xl mx-auto">
               Every number tells a story of trust, excellence, and the beautiful spaces we've created together
             </p>
           </div>
@@ -356,13 +356,15 @@ const AboutSection = () => {
             {stats.map((stat, index) => (
               <div key={stat.label} className="text-center group">
                 <div className="mb-2">
-                  <StatCounter 
-                    end={stat.value} 
-                    suffix={stat.suffix}
-                    duration={2000 + index * 200}
-                  />
+                  <div className="text-3xl lg:text-4xl font-bold text-amber-400 mb-2">
+                    <StatCounter 
+                      end={stat.value} 
+                      suffix={stat.suffix}
+                      duration={2000 + index * 200}
+                    />
+                  </div>
                 </div>
-                <p className="text-gray-500 font-medium text-sm lg:text-base group-hover:text-white transition-colors duration-300">
+                <p className="text-slate-200 font-medium text-sm lg:text-base group-hover:text-white transition-colors duration-300">
                   {stat.label}
                 </p>
               </div>
@@ -370,18 +372,18 @@ const AboutSection = () => {
           </div>
 
           {/* Trust Indicators */}
-          <div className="mt-8 pt-8 border-t border-amber-500/30">
-            <div className="flex flex-wrap justify-center items-center gap-6 text-gray-500">
+          <div className="mt-8 pt-8 border-t border-slate-400/30">
+            <div className="flex flex-wrap justify-center items-center gap-6 text-slate-200">
               <div className="flex items-center gap-2">
-                <CheckCircle2 size={20} className="text-gray-500" />
+                <CheckCircle2 size={20} className="text-slate-200" />
                 <span className="font-medium">Licensed & Insured</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 size={20} className="text-gray-500" />
+                <CheckCircle2 size={20} className="text-slate-200" />
                 <span className="font-medium">Quality Guaranteed</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 size={20} className="text-gray-500" />
+                <CheckCircle2 size={20} className="text-slate-200" />
                 <span className="font-medium">On-Time Delivery</span>
               </div>
             </div>
@@ -392,8 +394,680 @@ const AboutSection = () => {
   );
 };
 
+// Portfolio Section Component with Advanced Animations and Effects
+const PortfolioSection = () => {
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [filteredProjects, setFilteredProjects] = useState([]);
+  const [hoveredProject, setHoveredProject] = useState(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState(null);
+  const [visibleProjects, setVisibleProjects] = useState(6);
+  const [sectionRef, sectionVisible] = useIntersectionObserver();
+  const [headerRef, headerVisible] = useIntersectionObserver();
+  const [filterRef, filterVisible] = useIntersectionObserver();
+  const [gridRef, gridVisible] = useIntersectionObserver();
+
+  // Portfolio projects data
+  const portfolioProjects = [
+    {
+      id: 1,
+      title: "Modern Living Spaces",
+      category: "residential",
+      description: "Contemporary 3BHK apartment with minimalist design and smart storage solutions",
+      image: "src/assets/images/portfolio1.jpg",
+      beforeImage: "src/assets/images/before1.jpg",
+      client: "Sharma Family",
+      location: "Mumbai",
+      year: "2024",
+      area: "1,200 sq ft",
+      duration: "45 days",
+      budget: "₹8,50,000",
+      tags: ["Modern", "Minimalist", "Smart Storage"],
+      gallery: [
+        "src/assets/images/gallery1-1.jpg",
+        "src/assets/images/gallery1-2.jpg",
+        "src/assets/images/gallery1-3.jpg"
+      ]
+    },
+    {
+      id: 2,
+      title: "Luxury Villa Interior",
+      category: "luxury",
+      description: "Opulent villa design with premium materials and custom furniture",
+      image: "src/assets/images/portfolio2.jpg",
+      beforeImage: "src/assets/images/before2.jpg",
+      client: "Patel Residence",
+      location: "Bangalore",
+      year: "2024",
+      area: "3,500 sq ft",
+      duration: "75 days",
+      budget: "₹25,00,000",
+      tags: ["Luxury", "Custom Furniture", "Premium"],
+      gallery: [
+        "src/assets/images/gallery2-1.jpg",
+        "src/assets/images/gallery2-2.jpg",
+        "src/assets/images/gallery2-3.jpg"
+      ]
+    },
+    {
+      id: 3,
+      title: "Corporate Office Design",
+      category: "commercial",
+      description: "Modern office space designed for productivity and collaboration",
+      image: "src/assets/images/portfolio3.jpg",
+      beforeImage: "src/assets/images/before3.jpg",
+      client: "Tech Solutions Pvt Ltd",
+      location: "Pune",
+      year: "2024",
+      area: "2,800 sq ft",
+      duration: "60 days",
+      budget: "₹15,00,000",
+      tags: ["Corporate", "Modern", "Collaborative"],
+      gallery: [
+        "src/assets/images/gallery3-1.jpg",
+        "src/assets/images/gallery3-2.jpg",
+        "src/assets/images/gallery3-3.jpg"
+      ]
+    },
+    {
+      id: 4,
+      title: "Boutique Restaurant",
+      category: "commercial",
+      description: "Intimate dining space with warm ambiance and artistic elements",
+      image: "src/assets/images/portfolio4.jpg",
+      beforeImage: "src/assets/images/before4.jpg",
+      client: "Spice Garden Restaurant",
+      location: "Delhi",
+      year: "2023",
+      area: "1,800 sq ft",
+      duration: "50 days",
+      budget: "₹12,00,000",
+      tags: ["Restaurant", "Artistic", "Warm Ambiance"],
+      gallery: [
+        "src/assets/images/gallery4-1.jpg",
+        "src/assets/images/gallery4-2.jpg",
+        "src/assets/images/gallery4-3.jpg"
+      ]
+    },
+    {
+      id: 5,
+      title: "Traditional Home Makeover",
+      category: "residential",
+      description: "Blend of traditional and contemporary design elements",
+      image: "src/assets/images/portfolio5.jpg",
+      beforeImage: "src/assets/images/before5.jpg",
+      client: "Kumar Family",
+      location: "Jaipur",
+      year: "2023",
+      area: "2,200 sq ft",
+      duration: "65 days",
+      budget: "₹18,00,000",
+      tags: ["Traditional", "Contemporary", "Cultural"],
+      gallery: [
+        "src/assets/images/gallery5-1.jpg",
+        "src/assets/images/gallery5-2.jpg",
+        "src/assets/images/gallery5-3.jpg"
+      ]
+    },
+    {
+      id: 6,
+      title: "Penthouse Paradise",
+      category: "luxury",
+      description: "Sky-high luxury living with panoramic city views",
+      image: "src/assets/images/portfolio6.jpg",
+      beforeImage: "src/assets/images/before6.jpg",
+      client: "Elite Towers",
+      location: "Mumbai",
+      year: "2023",
+      area: "4,200 sq ft",
+      duration: "90 days",
+      budget: "₹35,00,000",
+      tags: ["Penthouse", "City Views", "Ultra Luxury"],
+      gallery: [
+        "src/assets/images/gallery6-1.jpg",
+        "src/assets/images/gallery6-2.jpg",
+        "src/assets/images/gallery6-3.jpg"
+      ]
+    },
+    {
+      id: 7,
+      title: "Cozy Studio Apartment",
+      category: "residential",
+      description: "Space-efficient design for modern urban living",
+      image: "src/assets/images/portfolio7.jpg",
+      beforeImage: "src/assets/images/before7.jpg",
+      client: "Young Professional",
+      location: "Bangalore",
+      year: "2024",
+      area: "650 sq ft",
+      duration: "30 days",
+      budget: "₹4,50,000",
+      tags: ["Studio", "Space Efficient", "Urban"],
+      gallery: [
+        "src/assets/images/gallery7-1.jpg",
+        "src/assets/images/gallery7-2.jpg",
+        "src/assets/images/gallery7-3.jpg"
+      ]
+    },
+    {
+      id: 8,
+      title: "Hotel Suite Design",
+      category: "commercial",
+      description: "Luxury hotel suite with world-class amenities",
+      image: "src/assets/images/portfolio8.jpg",
+      beforeImage: "src/assets/images/before8.jpg",
+      client: "Grand Plaza Hotel",
+      location: "Goa",
+      year: "2023",
+      area: "800 sq ft",
+      duration: "40 days",
+      budget: "₹10,00,000",
+      tags: ["Hotel", "Luxury", "Hospitality"],
+      gallery: [
+        "src/assets/images/gallery8-1.jpg",
+        "src/assets/images/gallery8-2.jpg",
+        "src/assets/images/gallery8-3.jpg"
+      ]
+    },
+    {
+      id: 9,
+      title: "Smart Home Integration",
+      category: "luxury",
+      description: "Cutting-edge smart home with automated systems",
+      image: "src/assets/images/portfolio9.jpg",
+      beforeImage: "src/assets/images/before9.jpg",
+      client: "Tech Entrepreneur",
+      location: "Hyderabad",
+      year: "2024",
+      area: "2,800 sq ft",
+      duration: "70 days",
+      budget: "₹22,00,000",
+      tags: ["Smart Home", "Automation", "Technology"],
+      gallery: [
+        "src/assets/images/gallery9-1.jpg",
+        "src/assets/images/gallery9-2.jpg",
+        "src/assets/images/gallery9-3.jpg"
+      ]
+    }
+  ];
+
+  // Filter categories
+  const filterCategories = [
+    { key: 'all', label: 'All Projects', icon: TrendingUp },
+    { key: 'residential', label: 'Residential', icon: Users },
+    { key: 'commercial', label: 'Commercial', icon: Award },
+    { key: 'luxury', label: 'Luxury', icon: Sparkles }
+  ];
+
+  // Filter projects based on active filter
+  useEffect(() => {
+    const filtered = activeFilter === 'all' 
+      ? portfolioProjects 
+      : portfolioProjects.filter(project => project.category === activeFilter);
+    setFilteredProjects(filtered);
+  }, [activeFilter]);
+
+  // Enhanced Project Card Component with advanced animations
+  const ProjectCard = ({ project, index, delay = 0 }) => {
+    const [cardRef, cardVisible] = useIntersectionObserver();
+    const [imageLoaded, setImageLoaded] = useState(false);
+    const isHovered = hoveredProject === project.id;
+
+    return (
+      <div
+        ref={cardRef}
+        className={`group relative bg-white rounded-3xl overflow-hidden shadow-lg border border-gray-100 transform transition-all duration-700 ease-out hover:shadow-2xl hover:-translate-y-3 ${
+          cardVisible 
+            ? 'opacity-100 translate-y-0 scale-100' 
+            : 'opacity-0 translate-y-12 scale-95'
+        }`}
+        style={{ 
+          transitionDelay: `${delay}ms`,
+          transformOrigin: 'center bottom'
+        }}
+        onMouseEnter={() => setHoveredProject(project.id)}
+        onMouseLeave={() => setHoveredProject(null)}
+      >
+        {/* Glowing border effect */}
+        <div className={`absolute inset-0 rounded-3xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 opacity-0 group-hover:opacity-20 transition-opacity duration-500 blur-sm -z-10 scale-105`}></div>
+        
+        {/* Image Container with advanced effects */}
+        <div className="relative h-64 lg:h-72 overflow-hidden bg-gray-200">
+          {/* Loading skeleton */}
+          {!imageLoaded && (
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300 animate-pulse">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent animate-shimmer"></div>
+            </div>
+          )}
+          
+          {/* Main project image */}
+          <ImageWithLoading 
+            src={project.image} 
+            alt={project.title}
+            className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-110 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            onLoad={() => setImageLoaded(true)}
+          />
+          
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          
+          {/* Category badge */}
+          <div className="absolute top-4 left-4">
+            <span className={`px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-sm transition-all duration-300 ${
+              project.category === 'residential' ? 'bg-blue-500/90 text-white' :
+              project.category === 'commercial' ? 'bg-green-500/90 text-white' :
+              'bg-purple-500/90 text-white'
+            } ${isHovered ? 'scale-110 shadow-lg' : ''}`}>
+              {project.category.charAt(0).toUpperCase() + project.category.slice(1)}
+            </span>
+          </div>
+          
+          {/* Quick action buttons */}
+          <div className={`absolute top-4 right-4 flex gap-2 transform transition-all duration-500 ${
+            isHovered ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'
+          }`}>
+            <button
+              onClick={() => {
+                setLightboxImage(project);
+                setLightboxOpen(true);
+              }}
+              className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-amber-500 hover:text-white transition-all duration-300 transform hover:scale-110 shadow-lg"
+            >
+              <Eye size={16} />
+            </button>
+            <button className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-amber-500 hover:text-white transition-all duration-300 transform hover:scale-110 shadow-lg">
+              <Heart size={16} />
+            </button>
+          </div>
+
+          {/* Floating stats on hover */}
+          <div className={`absolute bottom-4 left-4 right-4 transform transition-all duration-500 ${
+            isHovered ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+          }`}>
+            <div className="bg-white/95 backdrop-blur-sm rounded-xl p-3">
+              <div className="flex justify-between items-center text-xs">
+                <div className="text-center">
+                  <div className="font-bold text-amber-600">{project.area}</div>
+                  <div className="text-gray-600">Area</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-bold text-amber-600">{project.duration}</div>
+                  <div className="text-gray-600">Duration</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-bold text-amber-600">{project.budget}</div>
+                  <div className="text-gray-600">Budget</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 lg:p-8">
+          {/* Project title and location */}
+          <div className="mb-4">
+            <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2 group-hover:text-amber-600 transition-colors duration-300">
+              {project.title}
+            </h3>
+            <p className="text-gray-600 text-sm font-medium mb-3">
+              📍 {project.location} • {project.year}
+            </p>
+            <p className="text-gray-700 leading-relaxed line-clamp-2">
+              {project.description}
+            </p>
+          </div>
+
+          {/* Tags */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {project.tags.slice(0, 3).map((tag, tagIndex) => (
+              <span
+                key={tagIndex}
+                className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full group-hover:bg-amber-100 group-hover:text-amber-700 transition-colors duration-300"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          {/* Client info and action */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-amber-100 to-amber-200 rounded-full flex items-center justify-center">
+                <Users size={16} className="text-amber-600" />
+              </div>
+              <div>
+                <div className="font-semibold text-gray-900 text-sm">{project.client}</div>
+                <div className="text-xs text-gray-500">Client</div>
+              </div>
+            </div>
+            
+            <button className="group/btn bg-gray-100 hover:bg-amber-500 text-gray-700 hover:text-white px-4 py-2 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 text-sm transform hover:scale-105">
+              View Details
+              <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
+            </button>
+          </div>
+        </div>
+
+        {/* Hover reveal: Before/After indicator */}
+        <div className={`absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-amber-400 to-amber-600 transform transition-all duration-500 ${
+          isHovered ? 'scale-x-100' : 'scale-x-0'
+        }`}></div>
+      </div>
+    );
+  };
+
+  // Enhanced Lightbox Component
+  const Lightbox = ({ isOpen, project, onClose }) => {
+    if (!isOpen || !project) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div className="max-w-6xl w-full max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-2xl transform transition-all duration-500">
+          {/* Lightbox Header */}
+          <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">{project.title}</h2>
+              <p className="text-gray-600">{project.location} • {project.year}</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors duration-200"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Lightbox Content */}
+          <div className="p-6">
+            {/* Before/After Comparison */}
+            <div className="grid md:grid-cols-2 gap-6 mb-8">
+              <div>
+                <h3 className="text-lg font-semibold mb-3 text-gray-800">Before</h3>
+                <div className="rounded-2xl overflow-hidden shadow-lg">
+                  <ImageWithLoading 
+                    src={project.beforeImage} 
+                    alt={`${project.title} - Before`}
+                    className="w-full h-64 object-cover"
+                  />
+                </div>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-3 text-amber-600">After</h3>
+                <div className="rounded-2xl overflow-hidden shadow-lg">
+                  <ImageWithLoading 
+                    src={project.image} 
+                    alt={`${project.title} - After`}
+                    className="w-full h-64 object-cover"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Project Details */}
+            <div className="grid md:grid-cols-2 gap-8 mb-8">
+              <div>
+                <h3 className="text-lg font-semibold mb-4 text-gray-800">Project Details</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Client:</span>
+                    <span className="font-semibold">{project.client}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Location:</span>
+                    <span className="font-semibold">{project.location}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Year:</span>
+                    <span className="font-semibold">{project.year}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Area:</span>
+                    <span className="font-semibold">{project.area}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Duration:</span>
+                    <span className="font-semibold">{project.duration}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Budget:</span>
+                    <span className="font-semibold text-amber-600">{project.budget}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold mb-4 text-gray-800">Description</h3>
+                <p className="text-gray-700 leading-relaxed mb-4">{project.description}</p>
+                
+                <h4 className="font-semibold mb-2 text-gray-800">Key Features:</h4>
+                <div className="flex flex-wrap gap-2">
+                  {project.tags.map((tag, index) => (
+                    <span
+                      key={index}
+                      className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-sm font-medium"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Gallery */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">Project Gallery</h3>
+              <div className="grid md:grid-cols-3 gap-4">
+                {project.gallery.map((image, index) => (
+                  <div key={index} className="rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <ImageWithLoading 
+                      src={image} 
+                      alt={`${project.title} - Gallery ${index + 1}`}
+                      className="w-full h-40 object-cover hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <section id="portfolio" className="py-16 lg:py-24 bg-gradient-to-br from-gray-50 via-white to-amber-50 overflow-hidden relative">
+      {/* Background Decorations */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-amber-200 to-amber-300 rounded-full opacity-5 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-60 h-60 bg-gradient-to-br from-blue-200 to-purple-300 rounded-full opacity-5 animate-bounce-slow"></div>
+        <div className="absolute top-1/3 left-1/4 w-32 h-32 bg-gradient-to-br from-purple-200 to-pink-200 rounded-full opacity-3 animate-spin-slow"></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 lg:px-8 relative z-10">
+        {/* Section Header */}
+        <div ref={headerRef} className="text-center mb-16">
+          <div className={`transform transition-all duration-1000 ${
+            headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}>
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800 px-5 py-2 rounded-full text-sm font-semibold mb-6 shadow-sm">
+              <Award size={16} className="fill-current animate-pulse" />
+              Our Portfolio
+            </div>
+            <h2 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Our Beautiful
+              <span className="block text-amber-600">Design Projects</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Explore our diverse portfolio of stunning interior designs that showcase our expertise and creativity
+            </p>
+          </div>
+        </div>
+
+        {/* Filter Buttons */}
+        <div ref={filterRef} className={`transform transition-all duration-1000 delay-300 ${
+          filterVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        }`}>
+          <div className="flex flex-wrap justify-center gap-4 mb-12">
+            {filterCategories.map((category) => {
+              const Icon = category.icon;
+              return (
+                <button
+                  key={category.key}
+                  onClick={() => setActiveFilter(category.key)}
+                  className={`group flex items-center gap-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 ${
+                    activeFilter === category.key
+                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg scale-105'
+                      : 'bg-white text-gray-700 hover:bg-amber-50 hover:text-amber-600 shadow-md'
+                  }`}
+                >
+                  <Icon size={18} className={`transition-transform duration-300 ${
+                    activeFilter === category.key ? 'scale-110' : 'group-hover:scale-110'
+                  }`} />
+                  {category.label}
+                  {activeFilter === category.key && (
+                    <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Projects Grid */}
+        <div ref={gridRef} className={`transform transition-all duration-1000 delay-500 ${
+          gridVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        }`}>
+          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8 lg:gap-10 mb-12">
+            {filteredProjects.slice(0, visibleProjects).map((project, index) => (
+              <ProjectCard
+                key={`${project.id}-${activeFilter}`}
+                project={project}
+                index={index}
+                delay={index * 100}
+              />
+            ))}
+          </div>
+
+          {/* Load More Button */}
+          {visibleProjects < filteredProjects.length && (
+            <div className="text-center">
+              <button
+                onClick={() => setVisibleProjects(prev => prev + 3)}
+                className="group bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center gap-3 mx-auto"
+              >
+                Load More Projects
+                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform duration-300" />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Portfolio Stats */}
+        <div className="mt-20 bg-gradient-to-r from-slate-600 to-slate-700 rounded-3xl p-8 lg:p-12 shadow-xl">
+          <div className="text-center mb-8">
+            <h3 className="text-3xl lg:text-4xl font-bold text-white mb-4">
+              Portfolio Highlights
+            </h3>
+            <p className="text-slate-200 text-lg max-w-2xl mx-auto">
+              Our portfolio represents years of dedication to creating exceptional spaces
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="text-center group">
+              <div className="text-3xl lg:text-4xl font-bold text-amber-400 mb-2">
+                <StatCounter end={150} suffix="+" duration={2000} />
+              </div>
+              <p className="text-slate-200 font-medium group-hover:text-white transition-colors duration-300">
+                Completed Projects
+              </p>
+            </div>
+            <div className="text-center group">
+              <div className="text-3xl lg:text-4xl font-bold text-amber-400 mb-2">
+                <StatCounter end={25} suffix="+" duration={2200} />
+              </div>
+              <p className="text-slate-200 font-medium group-hover:text-white transition-colors duration-300">
+                Awards Won
+              </p>
+            </div>
+            <div className="text-center group">
+              <div className="text-3xl lg:text-4xl font-bold text-amber-400 mb-2">
+                <StatCounter end={98} suffix="%" duration={2400} />
+              </div>
+              <p className="text-slate-200 font-medium group-hover:text-white transition-colors duration-300">
+                Client Satisfaction
+              </p>
+            </div>
+            <div className="text-center group">
+              <div className="text-3xl lg:text-4xl font-bold text-amber-400 mb-2">
+                <StatCounter end={50} suffix="+" duration={2600} />
+              </div>
+              <p className="text-slate-200 font-medium group-hover:text-white transition-colors duration-300">
+                Cities Covered
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Lightbox */}
+      <Lightbox 
+        isOpen={lightboxOpen} 
+        project={lightboxImage} 
+        onClose={() => {
+          setLightboxOpen(false);
+          setLightboxImage(null);
+        }} 
+      />
+
+      {/* Enhanced CSS */}
+      <style jsx>{`
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        
+        .animate-shimmer {
+          animation: shimmer 1.5s infinite;
+        }
+        
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        
+        @keyframes bounce-slow {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-12px); }
+        }
+        
+        .animate-spin-slow {
+          animation: spin-slow 20s linear infinite;
+        }
+        
+        .animate-bounce-slow {
+          animation: bounce-slow 4s ease-in-out infinite;
+        }
+      `}</style>
+    </section>
+  );
+};
+
+
+
 // Enhanced Testimonials Section with 6 Cards and Premium Effects
-// Fixed Testimonials Section with Better Hover Effects
+// Fixed Testimonials Section with Better Hover Effects - UPDATED COLORS
 const TestimonialsSection = () => {
   const [activeCard, setActiveCard] = useState(0);
   const [hoveredCard, setHoveredCard] = useState(null);
@@ -782,13 +1456,13 @@ const TestimonialsSection = () => {
           ))}
         </div>
 
-        {/* Stats Footer */}
-        <div className="mt-20 bg-gradient-to-r from-gray-800 to-gray-900 rounded-3xl p-8 lg:p-12 shadow-xl">
+        {/* Stats Footer - UPDATED COLORS */}
+        <div className="mt-20 bg-gradient-to-r from-slate-600 to-slate-700 rounded-3xl p-8 lg:p-12 shadow-xl">
           <div className="text-center mb-10">
             <h3 className="text-3xl lg:text-4xl font-bold text-white mb-4">
               Client Satisfaction Statistics
             </h3>
-            <p className="text-gray-300 text-lg max-w-2xl mx-auto">
+            <p className="text-slate-200 text-lg max-w-2xl mx-auto">
               Numbers that speak for our commitment to excellence
             </p>
           </div>
@@ -796,25 +1470,25 @@ const TestimonialsSection = () => {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="text-center group">
               <div className="text-3xl lg:text-4xl font-bold text-amber-400 mb-2">98%</div>
-              <p className="text-gray-300 font-medium group-hover:text-white transition-colors duration-300">
+              <p className="text-slate-200 font-medium group-hover:text-white transition-colors duration-300">
                 Client Satisfaction
               </p>
             </div>
             <div className="text-center group">
               <div className="text-3xl lg:text-4xl font-bold text-amber-400 mb-2">100%</div>
-              <p className="text-gray-300 font-medium group-hover:text-white transition-colors duration-300">
+              <p className="text-slate-200 font-medium group-hover:text-white transition-colors duration-300">
                 On-Time Delivery
               </p>
             </div>
             <div className="text-center group">
               <div className="text-3xl lg:text-4xl font-bold text-amber-400 mb-2">95%</div>
-              <p className="text-gray-300 font-medium group-hover:text-white transition-colors duration-300">
+              <p className="text-slate-200 font-medium group-hover:text-white transition-colors duration-300">
                 Repeat Clients
               </p>
             </div>
             <div className="text-center group">
               <div className="text-3xl lg:text-4xl font-bold text-amber-400 mb-2">4.9★</div>
-              <p className="text-gray-300 font-medium group-hover:text-white transition-colors duration-300">
+              <p className="text-slate-200 font-medium group-hover:text-white transition-colors duration-300">
                 Average Rating
               </p>
             </div>
@@ -854,7 +1528,6 @@ const TestimonialsSection = () => {
     </section>
   );
 };
-
 
 // Connect With Us Modal Component
 const ConnectWithUsModal = ({ isOpen, onClose }) => {
