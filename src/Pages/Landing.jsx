@@ -395,10 +395,12 @@ const AboutSection = () => {
 };
 
 // Portfolio Section Component with animations and modern design
+// Portfolio Section Component - Clean version without flickering
+// Portfolio Section Component - Clean version without flickering
 const PortfolioSection = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [selectedProject, setSelectedProject] = useState(null);
-  const [hoveredProject, setHoveredProject] = useState(null);
+//   const [hoveredProject, setHoveredProject] = useState(null);
   const [sectionRef, sectionVisible] = useIntersectionObserver();
   const [gridRef, gridVisible] = useIntersectionObserver();
 
@@ -525,23 +527,20 @@ const PortfolioSection = () => {
     ? projects 
     : projects.filter(project => project.category === activeCategory);
 
-  // Project Card Component
+  // Simple Project Card Component - No complex animations
   const ProjectCard = ({ project, index, onClick }) => {
     const [cardRef, cardVisible] = useIntersectionObserver();
-    const isHovered = hoveredProject === project.id;
 
     return (
       <div
         ref={cardRef}
-        className={`group relative bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:shadow-2xl ${
+        className={`group relative bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
           cardVisible 
             ? 'opacity-100 translate-y-0' 
             : 'opacity-0 translate-y-8'
         }`}
         style={{ transitionDelay: `${index * 100}ms` }}
         onClick={() => onClick(project)}
-        onMouseEnter={() => setHoveredProject(project.id)}
-        onMouseLeave={() => setHoveredProject(null)}
       >
         {/* Image Container */}
         <div className="relative h-64 lg:h-72 overflow-hidden">
@@ -552,9 +551,7 @@ const PortfolioSection = () => {
           />
           
           {/* Overlay */}
-          <div className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-300 ${
-            isHovered ? 'opacity-100' : 'opacity-0'
-          }`} />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           
           {/* Category Badge */}
           <div className="absolute top-4 left-4">
@@ -564,9 +561,7 @@ const PortfolioSection = () => {
           </div>
           
           {/* View Project Button */}
-          <div className={`absolute bottom-4 left-4 right-4 transform transition-all duration-300 ${
-            isHovered ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-          }`}>
+          <div className="absolute bottom-4 left-4 right-4 transform transition-all duration-300 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100">
             <button className="w-full bg-white/95 backdrop-blur-sm text-gray-900 px-4 py-2 rounded-xl font-semibold hover:bg-white transition-colors duration-200 flex items-center justify-center gap-2">
               <span>View Project</span>
               <ArrowRight size={16} />
@@ -600,14 +595,14 @@ const PortfolioSection = () => {
           </div>
         </div>
 
-        {/* Decorative elements */}
+        {/* Simple decorative elements */}
         <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-amber-200 to-amber-300 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
         <div className="absolute -bottom-2 -left-2 w-6 h-6 bg-gradient-to-br from-blue-200 to-purple-200 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
       </div>
     );
   };
 
-  // Project Modal Component
+  // Project Modal Component (unchanged)
   const ProjectModal = ({ project, onClose }) => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -755,8 +750,8 @@ const PortfolioSection = () => {
     <section id="portfolio" className="py-16 lg:py-24 bg-gradient-to-br from-white via-gray-50 to-amber-50 overflow-hidden">
       {/* Background Decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-amber-200 to-amber-300 rounded-full opacity-5 animate-pulse" />
-        <div className="absolute -bottom-40 -left-40 w-60 h-60 bg-gradient-to-br from-blue-200 to-purple-300 rounded-full opacity-5 animate-bounce-slow" />
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-amber-200 to-amber-300 rounded-full opacity-5" />
+        <div className="absolute -bottom-40 -left-40 w-60 h-60 bg-gradient-to-br from-blue-200 to-purple-300 rounded-full opacity-5" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 lg:px-8 relative z-10">
@@ -851,17 +846,8 @@ const PortfolioSection = () => {
         onClose={() => setSelectedProject(null)} 
       />
 
-      {/* Custom Animations */}
+      {/* Simple CSS */}
       <style jsx>{`
-        @keyframes bounce-slow {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-8px); }
-        }
-        
-        .animate-bounce-slow {
-          animation: bounce-slow 3s ease-in-out infinite;
-        }
-        
         .line-clamp-2 {
           display: -webkit-box;
           -webkit-line-clamp: 2;
@@ -872,6 +858,8 @@ const PortfolioSection = () => {
     </section>
   );
 };
+
+
 
 // Enhanced Testimonials Section with 6 Cards and Premium Effects
 // Fixed Testimonials Section with Better Hover Effects - UPDATED COLORS
@@ -1670,30 +1658,6 @@ const FooterSection = () => {
         </div>
 
         <div className="relative z-10">
-          {/* Newsletter Section */}
-          <div className="bg-gradient-to-r bg-slate-700 py-12">
-            <div className="max-w-7xl mx-auto px-4 lg:px-8">
-              <div className="text-center">
-                <h3 className="text-2xl lg:text-3xl font-bold text-white mb-4">
-                  Stay Updated with Our Latest Designs
-                </h3>
-                <p className="text-blue-100 text-lg mb-8 max-w-2xl mx-auto">
-                  Subscribe to our newsletter for interior design tips, trends, and exclusive project showcases
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
-                  <input
-                    type="email"
-                    placeholder="Enter your email address"
-                    className="flex-1 px-6 py-3 rounded-xl bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white"
-                  />
-                  <button className="bg-slate-800 hover:bg-slate-700 text-white px-8 py-3 rounded-xl font-semibold transition-colors duration-200 flex items-center justify-center gap-2">
-                    <span>Subscribe</span>
-                    <ArrowRight size={16} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Main Footer Content */}
           <div ref={sectionRef} className="max-w-7xl mx-auto px-4 lg:px-8 py-16">
@@ -1872,12 +1836,6 @@ const FooterSection = () => {
                 <div className="text-slate-400 text-sm text-center lg:text-left">
                   © 2024 Swagruha Interiors. All rights reserved. | Designed with ❤️ for beautiful spaces
                 </div>
-                {/* <div className="flex flex-wrap justify-center gap-6 text-slate-400 text-sm">
-                  <a href="#privacy" className="hover:text-amber-400 transition-colors duration-200">Privacy Policy</a>
-                  <a href="#terms" className="hover:text-amber-400 transition-colors duration-200">Terms of Service</a>
-                  <a href="#cookies" className="hover:text-amber-400 transition-colors duration-200">Cookie Policy</a>
-                  <a href="#sitemap" className="hover:text-amber-400 transition-colors duration-200">Sitemap</a>
-                </div> */}
               </div>
             </div>
           </div>
