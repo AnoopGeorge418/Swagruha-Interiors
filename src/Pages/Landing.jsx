@@ -1,5 +1,95 @@
-import React, { useState, useEffect } from 'react';
-import { Phone, Menu, X, ChevronRight, Star, CheckCircle, Instagram, Twitter, Linkedin, Mail, MessageCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Phone, Menu, X, ChevronRight, Star, CheckCircle, Instagram, Twitter, Linkedin, Mail, MessageCircle, Users, Award, Heart, TrendingUp, CheckCircle2, Sparkles, ArrowRight } from 'lucide-react';
+
+// Intersection Observer Hook for animations
+const useIntersectionObserver = (options = {}) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef();
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setIsVisible(true);
+      }
+    }, { threshold: 0.1, ...options });
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => {
+      if (ref.current) {
+        observer.unobserve(ref.current);
+      }
+    };
+  }, []);
+
+  return [ref, isVisible];
+};
+
+// Stats Counter Component
+const StatCounter = ({ end, duration = 2000, suffix = "", prefix = "" }) => {
+  const [count, setCount] = useState(0);
+  const [ref, isVisible] = useIntersectionObserver();
+
+  useEffect(() => {
+    if (!isVisible) return;
+
+    let startTime;
+    const startCount = 0;
+
+    const updateCount = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+      const currentCount = Math.floor(easeOutQuart * (end - startCount) + startCount);
+      
+      setCount(currentCount);
+
+      if (progress < 1) {
+        requestAnimationFrame(updateCount);
+      }
+    };
+
+    requestAnimationFrame(updateCount);
+  }, [isVisible, end, duration]);
+
+  return (
+    <span ref={ref} className="font-bold text-2xl lg:text-3xl text-amber-600">
+      {prefix}{count}{suffix}
+    </span>
+  );
+};
+
+// Feature Card Component
+const FeatureCard = ({ icon: Icon, title, description, delay = 0 }) => {
+  const [ref, isVisible] = useIntersectionObserver();
+
+  return (
+    <div
+      ref={ref}
+      className={`group bg-white p-6 lg:p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 ${
+        isVisible 
+          ? 'opacity-100 translate-y-0' 
+          : 'opacity-0 translate-y-8'
+      }`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      <div className="mb-6">
+        <div className="w-14 h-14 bg-gradient-to-br from-amber-100 to-amber-200 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+          <Icon className="text-amber-600" size={28} />
+        </div>
+      </div>
+      <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-amber-600 transition-colors duration-300">
+        {title}
+      </h3>
+      <p className="text-gray-600 leading-relaxed">
+        {description}
+      </p>
+    </div>
+  );
+};
 
 // Image Loading Component with skeleton and error handling
 const ImageWithLoading = ({ src, alt, className = "" }) => {
@@ -92,6 +182,679 @@ const ProcessCard = ({ stepNumber, heading, description, images, isReversed = fa
     </div>
   );
 };
+
+// About Section Component
+const AboutSection = () => {
+  const [titleRef, titleVisible] = useIntersectionObserver();
+  const [contentRef, contentVisible] = useIntersectionObserver();
+  const [imageRef, imageVisible] = useIntersectionObserver();
+  const [statsRef, statsVisible] = useIntersectionObserver();
+
+  const features = [
+    {
+      icon: Users,
+      title: "Expert Team",
+      description: "Our skilled designers and craftsmen bring decades of combined experience to every project, ensuring exceptional quality and attention to detail."
+    },
+    {
+      icon: Award,
+      title: "Premium Quality",
+      description: "We use only the finest materials and latest design techniques to create interiors that stand the test of time while maintaining their elegance."
+    },
+    {
+      icon: Heart,
+      title: "Client-Centric",
+      description: "Your vision is our priority. We work closely with you throughout the process to ensure the final result perfectly matches your dreams and lifestyle."
+    },
+    {
+      icon: TrendingUp,
+      title: "Innovation",
+      description: "Staying ahead of design trends and incorporating cutting-edge technology to deliver modern, functional, and future-ready interior solutions."
+    }
+  ];
+
+  const stats = [
+    { label: "Projects Completed", value: 500, suffix: "+" },
+    { label: "Happy Clients", value: 450, suffix: "+" },
+    { label: "Years Experience", value: 12, suffix: "" },
+    { label: "Design Awards", value: 25, suffix: "+" }
+  ];
+
+  return (
+    <section id="about" className="py-16 lg:py-24 bg-gradient-to-br from-gray-50 via-white to-gray-50 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 lg:px-8">
+        {/* Section Header */}
+        <div ref={titleRef} className="text-center mb-16">
+          <div className={`transform transition-all duration-1000 ${
+            titleVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}>
+            <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+              <Sparkles size={16} className="fill-current" />
+              About Us
+            </div>
+            <h2 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Crafting Inspiring Spaces
+              <span className="block text-amber-600">with Elegance & Expertise</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Where creativity meets functionality to transform your vision into breathtaking reality
+            </p>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center mb-20">
+          {/* Content */}
+          <div ref={contentRef} className={`transform transition-all duration-1000 delay-300 ${
+            contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
+          }`}>
+            <div className="space-y-6 text-lg text-gray-700 leading-relaxed">
+              <p className="text-xl font-medium text-gray-900 mb-8">
+                At <span className="text-amber-600 font-bold">Swagruha Interiors</span>, we believe that great design has the power to transform not just spaces, but lives.
+              </p>
+              
+              <p>
+                Our journey began with a simple yet profound vision: to create interiors that seamlessly blend 
+                <strong className="text-gray-900"> aesthetics with functionality</strong>, reflecting the unique personality 
+                and lifestyle of each client. Every project we undertake is a canvas where creativity meets precision.
+              </p>
+              
+              <p>
+                With our team of <strong className="text-gray-900">expert designers and master craftsmen</strong>, 
+                we bring years of experience and passion to every detail. From concept development to final installation, 
+                we ensure that quality, innovation, and client satisfaction remain at the heart of everything we do.
+              </p>
+              
+              <p>
+                What sets us apart is our commitment to <strong className="text-gray-900">transparency and collaboration</strong>. 
+                We believe in keeping you involved throughout the entire process, ensuring that your dream interior becomes 
+                a beautiful reality that exceeds your expectations.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 pt-6">
+                <button className="group bg-orange-500 hover:bg-amber-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 hover:shadow-lg transform hover:scale-105">
+                  Start Your Journey
+                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                </button>
+                <button className="border-2 border-gray-300 hover:border-amber-500 text-gray-700 hover:text-amber-600 px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg">
+                  View Portfolio
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Image */}
+          <div ref={imageRef} className={`transform transition-all duration-1000 delay-500 ${
+            imageVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
+          }`}>
+            <div className="relative group">
+              {/* Main Image */}
+              <div className="relative overflow-hidden rounded-3xl shadow-2xl">
+                <ImageWithLoading 
+                  src="src/assets/images/img16.jpg" 
+                  alt="Swagruha Interiors Showcase" 
+                  className="w-full h-96 lg:h-[500px] object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+                {/* Overlay with floating elements */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+                
+                {/* Floating Stats Card */}
+                <div className="absolute bottom-6 left-6 right-6 bg-white/95 backdrop-blur-sm rounded-2xl p-4 transform group-hover:scale-105 transition-all duration-500">
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="text-center">
+                      <div className="font-bold text-lg text-amber-600">500+</div>
+                      <div className="text-gray-600">Projects</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="font-bold text-lg text-amber-600">450+</div>
+                      <div className="text-gray-600">Happy Clients</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="font-bold text-lg text-amber-600">12</div>
+                      <div className="text-gray-600">Years</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Decorative Elements */}
+              <div className="absolute -top-4 -right-4 w-20 h-20 bg-blue-200 rounded-full opacity-60 group-hover:scale-125 transition-transform duration-500"></div>
+              <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-red-300 rounded-full opacity-40 group-hover:scale-125 transition-transform duration-500 delay-100"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Features Grid */}
+        <div className="mb-20">
+          <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-6 lg:gap-8">
+            {features.map((feature, index) => (
+              <FeatureCard
+                key={feature.title}
+                icon={feature.icon}
+                title={feature.title}
+                description={feature.description}
+                delay={index * 150}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Stats Section */}
+        <div ref={statsRef} className={`bg-gradient-to-r from-orange-200 to-orange-300 rounded-3xl p-8 lg:p-12 transform transition-all duration-1000 ${
+          statsVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+        }`}>
+          <div className="text-center mb-8">
+            <h3 className="text-3xl lg:text-4xl font-bold text-gray-500 mb-4">
+              Our Journey in Numbers
+            </h3>
+            <p className="text-gray-500 text-lg max-w-2xl mx-auto">
+              Every number tells a story of trust, excellence, and the beautiful spaces we've created together
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
+              <div key={stat.label} className="text-center group">
+                <div className="mb-2">
+                  <StatCounter 
+                    end={stat.value} 
+                    suffix={stat.suffix}
+                    duration={2000 + index * 200}
+                  />
+                </div>
+                <p className="text-gray-500 font-medium text-sm lg:text-base group-hover:text-white transition-colors duration-300">
+                  {stat.label}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Trust Indicators */}
+          <div className="mt-8 pt-8 border-t border-amber-500/30">
+            <div className="flex flex-wrap justify-center items-center gap-6 text-gray-500">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 size={20} className="text-gray-500" />
+                <span className="font-medium">Licensed & Insured</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 size={20} className="text-gray-500" />
+                <span className="font-medium">Quality Guaranteed</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 size={20} className="text-gray-500" />
+                <span className="font-medium">On-Time Delivery</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// Enhanced Testimonials Section with 6 Cards and Premium Effects
+// Fixed Testimonials Section with Better Hover Effects
+const TestimonialsSection = () => {
+  const [activeCard, setActiveCard] = useState(0);
+  const [hoveredCard, setHoveredCard] = useState(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [destroyingCard, setDestroyingCard] = useState(null);
+  const [sectionRef, sectionVisible] = useIntersectionObserver();
+  const [cardsRef, cardsVisible] = useIntersectionObserver();
+
+  const testimonials = [
+    {
+      id: 1,
+      name: "Priya Sharma",
+      role: "Homeowner",
+      location: "Mumbai",
+      rating: 5,
+      image: "src/assets/images/client1.jpg",
+      quote: "Swagruha Interiors transformed our 3BHK into a masterpiece. Their attention to detail and modern approach exceeded our expectations. The team was professional, punctual, and delivered exactly what they promised.",
+      project: "Modern Residential Interior",
+      duration: "45 days"
+    },
+    {
+      id: 2,
+      name: "Rajesh Kumar",
+      role: "Business Owner",
+      location: "Delhi",
+      rating: 5,
+      image: "src/assets/images/client2.jpg",
+      quote: "Outstanding work on our office space! The team understood our corporate requirements perfectly and created a workspace that's both functional and inspiring. Highly recommend their services.",
+      project: "Corporate Office Design",
+      duration: "30 days"
+    },
+    {
+      id: 3,
+      name: "Anita Desai",
+      role: "Architect",
+      location: "Bangalore",
+      rating: 5,
+      image: "src/assets/images/client3.jpg",
+      quote: "As an architect myself, I was impressed by their innovative design solutions and quality execution. They brought fresh ideas while respecting our budget and timeline constraints.",
+      project: "Luxury Villa Interior",
+      duration: "60 days"
+    },
+    {
+      id: 4,
+      name: "Vikram Singh",
+      role: "Entrepreneur",
+      location: "Pune",
+      rating: 5,
+      image: "src/assets/images/client4.jpg",
+      quote: "The 3D visualization helped us see our dream home before construction. The final result was even better than we imagined. Professional team with excellent communication throughout.",
+      project: "Complete Home Makeover",
+      duration: "75 days"
+    },
+    {
+      id: 5,
+      name: "Meera Patel",
+      role: "Interior Designer",
+      location: "Ahmedabad",
+      rating: 5,
+      image: "src/assets/images/client5.jpg",
+      quote: "Collaborated with them on a luxury project. Their craftsmanship and material selection is top-notch. They understand modern design trends while maintaining functionality.",
+      project: "Luxury Apartment",
+      duration: "50 days"
+    },
+    {
+      id: 6,
+      name: "Arjun Mehta",
+      role: "Tech Executive",
+      location: "Hyderabad",
+      rating: 5,
+      image: "src/assets/images/client6.jpg",
+      quote: "From concept to completion, Swagruha Interiors delivered excellence. Their innovative use of space and premium materials created our dream smart home. Exceptional quality and service.",
+      project: "Smart Home Interior",
+      duration: "65 days"
+    }
+  ];
+
+  // Slower auto-rotate with destruction effects
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!isTransitioning && hoveredCard === null) {
+        handleCardTransition();
+      }
+    }, 12000);
+
+    return () => clearInterval(interval);
+  }, [activeCard, isTransitioning, hoveredCard]);
+
+  const handleCardTransition = () => {
+    setIsTransitioning(true);
+    setDestroyingCard(activeCard);
+
+    setTimeout(() => {
+      const nextIndex = (activeCard + 1) % testimonials.length;
+      setActiveCard(nextIndex);
+      
+      setTimeout(() => {
+        setDestroyingCard(null);
+        setIsTransitioning(false);
+      }, 800);
+    }, 1500);
+  };
+
+  const StarRating = ({ rating }) => {
+    return (
+      <div className="flex items-center gap-1 mb-4">
+        {[...Array(5)].map((_, index) => (
+          <Star
+            key={index}
+            size={18}
+            className={`${
+              index < rating 
+                ? 'text-amber-400 fill-current' 
+                : 'text-gray-300'
+            } transition-colors duration-300`}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  const TestimonialCard = ({ testimonial, index, isActive, isDestroying }) => {
+    const [cardRef, cardVisible] = useIntersectionObserver();
+    const isHovered = hoveredCard === index;
+    const isInBackground = hoveredCard !== null && hoveredCard !== index;
+    
+    // Fixed card state classes with reduced scaling and faster transitions
+    const getCardClasses = () => {
+      let baseClasses = "relative bg-white rounded-2xl p-6 lg:p-8 border border-gray-100 transform transition-all duration-300 ease-out cursor-pointer";
+      
+      if (isDestroying) {
+        return `${baseClasses} opacity-0 scale-75 -rotate-12 translate-y-12 blur-sm shadow-none`;
+      }
+      
+      if (isHovered) {
+        return `${baseClasses} opacity-100 scale-105 shadow-xl ring-2 ring-amber-300 z-30 bg-gradient-to-br from-white to-amber-50/30`;
+      }
+      
+      if (isInBackground) {
+        return `${baseClasses} opacity-40 scale-98 blur-sm shadow-md z-5`;
+      }
+      
+      if (isActive) {
+        return `${baseClasses} opacity-100 scale-102 shadow-lg ring-1 ring-amber-200 z-20`;
+      }
+      
+      return `${baseClasses} opacity-90 scale-100 shadow-md hover:shadow-lg z-10`;
+    };
+
+    return (
+      <div
+        ref={cardRef}
+        className={`${getCardClasses()} ${
+          cardVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        }`}
+        style={{ 
+          transitionDelay: cardVisible ? `${index * 100}ms` : '0ms', // Faster stagger
+          animation: (isActive || isHovered) ? 'subtle-glow 4s infinite' : 'none',
+          transformOrigin: 'center center',
+          filter: isInBackground ? 'blur(1px)' : 'blur(0px)',
+          // Reduced and softer box shadows
+          boxShadow: isHovered ? 
+            '0 10px 20px -6px rgba(0, 0, 0, 0.10), 0 0 0 1px rgba(71, 85, 105, 0.15), 0 0 20px rgba(71, 85, 105, 0.07)' :
+        isActive ? 
+            '0 8px 18px -6px rgba(0, 0, 0, 0.09), 0 0 12px rgba(71, 85, 105, 0.06)' :
+            '0 3px 10px -4px rgba(0, 0, 0, 0.05)',
+
+        backgroundColor: isHovered ? 'rgba(248, 250, 252, 0.8)' : 'rgba(255, 255, 255, 0.95)',
+        border: isActive ? '1px solid rgba(71, 85, 105, 0.2)' : '1px solid rgba(226, 232, 240, 0.5)'
+        }}
+        onMouseEnter={() => {
+          if (!isTransitioning) {
+            setHoveredCard(index);
+            setActiveCard(index);
+          }
+        }}
+        onMouseLeave={() => {
+          setHoveredCard(null);
+        }}
+      >
+        {/* Subtle glowing border effect */}
+        {(isHovered || isActive) && (
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-amber-100 via-amber-200 to-amber-100 opacity-15 animate-pulse blur-sm -z-10"></div>
+        )}
+
+        {/* Destruction Particle Effects */}
+        {isDestroying && (
+          <>
+            {[...Array(12)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-2 h-2 bg-gradient-to-r from-amber-400 to-amber-600 rounded-full animate-ping"
+                style={{
+                  top: `${Math.random() * 100}%`,
+                  left: `${Math.random() * 100}%`,
+                  animationDelay: `${i * 80}ms`,
+                  animationDuration: '1s'
+                }}
+              />
+            ))}
+          </>
+        )}
+
+        {/* Smaller decorative elements */}
+        <div className={`absolute -top-3 -right-3 w-16 h-16 bg-gradient-to-br from-amber-200 to-amber-300 rounded-full opacity-15 transition-all duration-500 ${
+          isHovered ? 'animate-spin-slow scale-125 opacity-25' : 'animate-pulse'
+        }`}></div>
+        <div className={`absolute -bottom-2 -left-2 w-12 h-12 bg-gradient-to-br from-blue-200 to-purple-200 rounded-full opacity-10 transition-all duration-500 ${
+          isHovered ? 'animate-bounce-slow scale-110 opacity-20' : ''
+        }`}></div>
+        
+        {/* Smaller quote icon */}
+        <div className={`absolute top-4 left-4 w-10 h-10 bg-gradient-to-br from-amber-100 to-amber-200 rounded-xl flex items-center justify-center transition-all duration-300 ${
+          isHovered ? 'shadow-amber-300 shadow-md scale-110' : 'shadow-amber-200 shadow-sm'
+        }`}>
+          <span className="text-xl text-amber-600 font-bold">"</span>
+        </div>
+
+        {/* Smaller client image */}
+        <div className="flex justify-center mb-5 mt-4">
+          <div className="relative">
+            <div className={`w-20 h-20 rounded-full overflow-hidden border-3 transition-all duration-300 ${
+              isHovered ? 'border-amber-400 shadow-amber-200 shadow-md scale-110' : 'border-amber-200 shadow-sm'
+            }`}>
+              <ImageWithLoading 
+                src={testimonial.image} 
+                alt={testimonial.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            
+            {/* Smaller online indicator */}
+            <div className={`absolute -bottom-1 -right-1 w-6 h-6 bg-gradient-to-r from-green-400 to-green-500 rounded-full border-2 border-white shadow-sm transition-all duration-300 ${
+              isHovered ? 'scale-110' : ''
+            }`}>
+              <div className="w-full h-full rounded-full bg-green-500 animate-ping opacity-60"></div>
+            </div>
+            
+            {/* Subtle halo effect */}
+            {isHovered && (
+              <div className="absolute inset-0 rounded-full bg-amber-300 opacity-20 animate-ping scale-125"></div>
+            )}
+          </div>
+        </div>
+
+        {/* Enhanced Rating */}
+        <div className="flex justify-center">
+          <StarRating rating={testimonial.rating} />
+        </div>
+
+        {/* Quote with subtle enhancement */}
+        <p className={`text-base leading-relaxed mb-6 text-center italic font-medium transition-all duration-300 ${
+          isHovered ? 'text-gray-900 font-semibold' : 'text-gray-700'
+        }`}>
+          "{testimonial.quote}"
+        </p>
+
+        {/* Improved client info card */}
+        <div className={`text-center mb-5 p-3 rounded-xl transition-all duration-300 ${
+          isHovered ? 
+          'bg-gradient-to-r from-amber-50/50 to-white border border-amber-100' :
+          'bg-gradient-to-r from-gray-50/50 to-white'
+        }`}>
+          <h4 className={`text-lg font-bold mb-1 transition-all duration-300 ${
+            isHovered ? 'text-amber-800' : 'text-gray-900'
+          }`}>
+            {testimonial.name}
+          </h4>
+          <p className={`font-semibold mb-1 transition-all duration-300 ${
+            isHovered ? 'text-amber-700' : 'text-amber-600'
+          }`}>
+            {testimonial.role}
+          </p>
+          <p className={`text-sm transition-all duration-300 ${
+            isHovered ? 'text-gray-700' : 'text-gray-500'
+          }`}>
+            📍 {testimonial.location}
+          </p>
+        </div>
+
+        {/* Improved project details card */}
+        <div className={`rounded-xl p-4 space-y-2 transition-all duration-300 border ${
+          isHovered ? 
+          'bg-gradient-to-r from-amber-50/30 to-white border-amber-150' :
+          'bg-gradient-to-r from-gray-50/50 to-gray-100/50 border-gray-150'
+        }`}>
+          <div className="flex items-center justify-between text-sm">
+            <span className={`font-medium transition-all duration-300 ${
+              isHovered ? 'text-amber-700' : 'text-gray-600'
+            }`}>Project:</span>
+            <span className={`font-semibold transition-all duration-300 ${
+              isHovered ? 'text-amber-800' : 'text-gray-800'
+            }`}>{testimonial.project}</span>
+          </div>
+          <div className="flex items-center justify-between text-sm">
+            <span className={`font-medium transition-all duration-300 ${
+              isHovered ? 'text-amber-700' : 'text-gray-600'
+            }`}>Duration:</span>
+            <span className={`font-semibold transition-all duration-300 ${
+              isHovered ? 'text-amber-800' : 'text-amber-600'
+            }`}>{testimonial.duration}</span>
+          </div>
+        </div>
+
+        {/* Smaller verified badge */}
+        <div className="absolute top-4 right-4">
+          <div className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 transition-all duration-300 ${
+            isHovered ? 
+            'bg-gradient-to-r from-green-200 to-green-300 text-green-900 scale-105' :
+            'bg-gradient-to-r from-green-100 to-green-200 text-green-800'
+          }`}>
+            <CheckCircle2 size={12} />
+            Verified
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <section id="testimonials" className="py-16 lg:py-24 bg-gradient-to-br from-gray-50 via-white to-amber-50 overflow-hidden relative">
+      {/* Background Decorations */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-amber-200 to-amber-300 rounded-full opacity-8 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-60 h-60 bg-gradient-to-br from-blue-200 to-purple-300 rounded-full opacity-8 animate-bounce-slow"></div>
+        <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-gradient-to-br from-purple-200 to-pink-200 rounded-full opacity-5 animate-spin-slow"></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 lg:px-8 relative z-10">
+        {/* Section Header */}
+        <div ref={sectionRef} className="text-center mb-16">
+          <div className={`transform transition-all duration-800 ${
+            sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}>
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800 px-5 py-2 rounded-full text-sm font-semibold mb-6 shadow-sm">
+              <Heart size={16} className="fill-current animate-pulse" />
+              Client Testimonials
+            </div>
+            <h2 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              What Our Clients
+              <span className="block text-amber-600">Say About Us</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Real stories from real clients who trusted us with their dream spaces
+            </p>
+          </div>
+        </div>
+
+        {/* 6-Card Testimonials Grid */}
+        <div ref={cardsRef} className={`transform transition-all duration-800 delay-200 ${
+          cardsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        }`}>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+            {testimonials.map((testimonial, index) => (
+              <TestimonialCard
+                key={testimonial.id}
+                testimonial={testimonial}
+                index={index}
+                isActive={activeCard === index}
+                isDestroying={destroyingCard === index}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Navigation Dots */}
+        <div className="flex justify-center mt-12 space-x-3">
+          {testimonials.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                if (!isTransitioning) {
+                  setActiveCard(index);
+                }
+              }}
+              className={`relative transition-all duration-300 ${
+                index === activeCard
+                  ? 'w-8 h-3 bg-gradient-to-r from-amber-500 to-amber-600 rounded-full scale-110'
+                  : 'w-3 h-3 bg-gray-300 rounded-full hover:bg-gray-400'
+              }`}
+            >
+              {index === activeCard && (
+                <div className="absolute inset-0 bg-amber-400 rounded-full animate-ping opacity-60"></div>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Stats Footer */}
+        <div className="mt-20 bg-gradient-to-r from-gray-800 to-gray-900 rounded-3xl p-8 lg:p-12 shadow-xl">
+          <div className="text-center mb-10">
+            <h3 className="text-3xl lg:text-4xl font-bold text-white mb-4">
+              Client Satisfaction Statistics
+            </h3>
+            <p className="text-gray-300 text-lg max-w-2xl mx-auto">
+              Numbers that speak for our commitment to excellence
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="text-center group">
+              <div className="text-3xl lg:text-4xl font-bold text-amber-400 mb-2">98%</div>
+              <p className="text-gray-300 font-medium group-hover:text-white transition-colors duration-300">
+                Client Satisfaction
+              </p>
+            </div>
+            <div className="text-center group">
+              <div className="text-3xl lg:text-4xl font-bold text-amber-400 mb-2">100%</div>
+              <p className="text-gray-300 font-medium group-hover:text-white transition-colors duration-300">
+                On-Time Delivery
+              </p>
+            </div>
+            <div className="text-center group">
+              <div className="text-3xl lg:text-4xl font-bold text-amber-400 mb-2">95%</div>
+              <p className="text-gray-300 font-medium group-hover:text-white transition-colors duration-300">
+                Repeat Clients
+              </p>
+            </div>
+            <div className="text-center group">
+              <div className="text-3xl lg:text-4xl font-bold text-amber-400 mb-2">4.9★</div>
+              <p className="text-gray-300 font-medium group-hover:text-white transition-colors duration-300">
+                Average Rating
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Optimized Custom CSS */}
+      <style jsx>{`
+        @keyframes subtle-glow {
+          0%, 100% { 
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.15); 
+          }
+          50% { 
+            box-shadow: 0 0 25px rgba(251, 191, 36, 0.25); 
+          }
+        }
+        
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        
+        @keyframes bounce-slow {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
+        }
+        
+        .animate-spin-slow {
+          animation: spin-slow 15s linear infinite;
+        }
+        
+        .animate-bounce-slow {
+          animation: bounce-slow 3s ease-in-out infinite;
+        }
+      `}</style>
+    </section>
+  );
+};
+
 
 // Connect With Us Modal Component
 const ConnectWithUsModal = ({ isOpen, onClose }) => {
@@ -348,11 +1111,11 @@ const Landing = () => {
         />
       )}
 
-      {/* Fixed Navigation - Improved logo styling */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-md">
+      {/* Navigation - Made fully transparent and increased logo size */}
+      <nav className="absolute top-0 left-0 right-0 z-50">
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-3">
           <div className="flex justify-between items-center">
-            {/* Logo - Improved styling */}
+            {/* Logo - Increased size */}
             <a 
               href="#home" 
               className="flex items-center transform hover:scale-105 transition-transform duration-300"
@@ -361,11 +1124,11 @@ const Landing = () => {
                 handleNavClick('#home');
               }}
             >
-              <div className="">
+              <div>
                 <img 
                   src="src/assets/images/img17.jpg"
                   alt="Swagruha Interiors" 
-                  className="bg-white rounded-2xl h-20 lg:h-24 w-auto max-w-[800px] lg:max-w-[1000px] object-contain"
+                  className="rounded-2xl h-24 lg:h-32 w-auto max-w-[900px] lg:max-w-[1200px] object-contain shadow-lg"
                 />
               </div>
             </a>
@@ -408,7 +1171,7 @@ const Landing = () => {
         </div>
       </nav>
 
-      {/* Mobile Menu - Improved logo styling */}
+      {/* Mobile Menu - Updated logo size */}
       <div className={`fixed top-0 left-0 h-full w-80 bg-black/95 backdrop-blur-xl z-50 transform transition-transform duration-300 ${
         menuOpen ? 'translate-x-0' : '-translate-x-full'
       } lg:hidden`}>
@@ -417,7 +1180,7 @@ const Landing = () => {
             <img 
               src="src/assets/images/img17.jpg"
               alt="Swagruha Interiors" 
-              className="bg-white rounded-2xl h-22 w-auto max-w-[480px] object-contain"
+              className="bg-white rounded-2xl h-28 w-auto max-w-[520px] object-contain"
             />
           </div>
           
@@ -476,7 +1239,7 @@ const Landing = () => {
             </p>
             <button
               onClick={() => handleNavClick('#get-quote')}
-              className="bg-amber-400 hover:bg-white hover:text-amber-500 text-black px-8 py-4 rounded-2xl text-lg font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-xl inline-flex items-center gap-2 cursor-pointer "
+              className="bg-amber-400 hover:bg-white hover:text-amber-500 text-black px-8 py-4 rounded-2xl text-lg font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-xl inline-flex items-center gap-2 cursor-pointer"
             >
               Get Your Free Quote
               <ChevronRight size={20} />
@@ -531,34 +1294,40 @@ const Landing = () => {
             ))}
           </div>
 
-            {/* Communication Card - Fixed padding and mobile alignment */}
-            <div className="bg-white px-6 lg:px-10 py-8 lg:py-12 rounded-2xl shadow-xl mt-8 border border-gray-100">
-                <div className="flex flex-col md:flex-row items-center md:items-center gap-6">
-                    <div className="flex items-start gap-4 flex-1 w-full md:w-auto">
-                    <div className="bg-amber-100 p-3 rounded-xl flex-shrink-0">
-                        <Phone className="text-amber-600" size={24} />
-                    </div>
-                    <div className="flex-1">
-                        <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
-                        Ongoing Client Communication
-                        </h3>
-                        <p className="text-gray-600 leading-relaxed max-w-2xl">
-                        Throughout every step — from design to delivery — we keep you updated via regular calls, 
-                        messages, and previews. Transparency, clarity, and peace of mind are always guaranteed.
-                        </p>
-                    </div>
-                    </div>
-                    <button
-                    onClick={() => setConnectModalOpen(true)}
-                    className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:shadow-lg transition-shadow duration-300 cursor-pointer flex-shrink-0 w-full md:w-auto justify-center md:justify-start"
-                    >
-                    <CheckCircle size={18} />
-                    Real-time Updates
-                    </button>
+          {/* Communication Card - Fixed padding and mobile alignment */}
+          <div className="bg-white px-6 lg:px-10 py-8 lg:py-12 rounded-2xl shadow-xl mt-8 border border-gray-100">
+            <div className="flex flex-col md:flex-row items-center md:items-center gap-6">
+              <div className="flex items-start gap-4 flex-1 w-full md:w-auto">
+                <div className="bg-amber-100 p-3 rounded-xl flex-shrink-0">
+                  <Phone className="text-amber-600" size={24} />
                 </div>
+                <div className="flex-1">
+                  <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
+                    Ongoing Client Communication
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed max-w-2xl">
+                    Throughout every step — from design to delivery — we keep you updated via regular calls, 
+                    messages, and previews. Transparency, clarity, and peace of mind are always guaranteed.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setConnectModalOpen(true)}
+                className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:shadow-lg transition-shadow duration-300 cursor-pointer flex-shrink-0 w-full md:w-auto justify-center md:justify-start"
+              >
+                <CheckCircle size={18} />
+                Real-time Updates
+              </button>
             </div>
+          </div>
         </div>
       </section>
+
+      {/* About Section */}
+      <AboutSection />
+
+      {/* Testimonials Section */}
+        <TestimonialsSection />
 
       {/* Connect With Us Modal */}
       <ConnectWithUsModal 
