@@ -1,58 +1,109 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Phone, Menu, X, ChevronRight, Star, CheckCircle, Instagram, Twitter, Linkedin, Mail, MessageCircle, Users, Award, Heart, TrendingUp, CheckCircle2, Sparkles, ArrowRight, HelpCircle, MapPin, Clock, Navigation  } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { Phone, Menu, X, ChevronRight, Star, CheckCircle, Instagram, Twitter, Linkedin, Mail, MessageCircle, Users, Award, Heart, TrendingUp, CheckCircle2, Sparkles, ArrowRight, HelpCircle, MapPin, Clock, Navigation, AlertCircle  } from 'lucide-react';
 
-// Intersection Observer Hook for animations
+// Optimized Intersection Observer Hook with throttling
 const useIntersectionObserver = (options = {}) => {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef();
+  const observerRef = useRef();
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
+      if (entry.isIntersecting && !isVisible) {
         setIsVisible(true);
+        // Disconnect after first intersection for better performance
+        if (observerRef.current) {
+          observerRef.current.disconnect();
+        }
       }
-    }, { threshold: 0.1, ...options });
+    }, { threshold: 0.1, rootMargin: '50px', ...options });
+
+    observerRef.current = observer;
 
     if (ref.current) {
       observer.observe(ref.current);
     }
 
     return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current);
+      if (observerRef.current) {
+        observerRef.current.disconnect();
       }
     };
-  }, []);
+  }, [isVisible]);
 
   return [ref, isVisible];
 };
 
-// Stats Counter Component
+// Form validation functions
+const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const validatePhone = (phone) => {
+  const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+  const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
+  return phoneRegex.test(cleanPhone) && cleanPhone.length >= 10;
+};
+
+const validateName = (name) => {
+  return name.trim().length >= 2 && /^[a-zA-Z\s]+$/.test(name.trim());
+};
+
+// Success/Error Alert Component
+const Alert = React.memo(({ type, message, onClose }) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onClose();
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+  const icon = type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />;
+
+  return (
+    <div className={`fixed top-4 right-4 ${bgColor} text-white px-6 py-4 rounded-lg shadow-lg z-[60] flex items-center gap-3 transform transition-all duration-300 animate-slide-in`}>
+      {icon}
+      <span className="font-medium">{message}</span>
+      <button onClick={onClose} className="ml-2 hover:bg-white/20 rounded p-1">
+        <X size={16} />
+      </button>
+    </div>
+  );
+});
+
+// Optimized Stats Counter Component with RAF
 const StatCounter = ({ end, duration = 2000, suffix = "", prefix = "" }) => {
   const [count, setCount] = useState(0);
   const [ref, isVisible] = useIntersectionObserver();
+  const animationRef = useRef();
 
   useEffect(() => {
     if (!isVisible) return;
 
     let startTime;
-    const startCount = 0;
-
-    const updateCount = (timestamp) => {
+    const animate = (timestamp) => {
       if (!startTime) startTime = timestamp;
       const progress = Math.min((timestamp - startTime) / duration, 1);
       
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-      const currentCount = Math.floor(easeOutQuart * (end - startCount) + startCount);
+      const currentCount = Math.floor(easeOutQuart * end);
       
       setCount(currentCount);
 
       if (progress < 1) {
-        requestAnimationFrame(updateCount);
+        animationRef.current = requestAnimationFrame(animate);
       }
     };
 
-    requestAnimationFrame(updateCount);
+    animationRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
   }, [isVisible, end, duration]);
 
   return (
@@ -62,14 +113,14 @@ const StatCounter = ({ end, duration = 2000, suffix = "", prefix = "" }) => {
   );
 };
 
-// Feature Card Component
-const FeatureCard = ({ icon: Icon, title, description, delay = 0 }) => {
+// Optimized Feature Card Component
+const FeatureCard = React.memo(({ icon: Icon, title, description, delay = 0 }) => {
   const [ref, isVisible] = useIntersectionObserver();
 
   return (
     <div
       ref={ref}
-      className={`group bg-white p-6 lg:p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 ${
+      className={`group bg-white p-6 lg:p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ${
         isVisible 
           ? 'opacity-100 translate-y-0' 
           : 'opacity-0 translate-y-8'
@@ -77,7 +128,7 @@ const FeatureCard = ({ icon: Icon, title, description, delay = 0 }) => {
       style={{ transitionDelay: `${delay}ms` }}
     >
       <div className="mb-6">
-        <div className="w-14 h-14 bg-gradient-to-br from-amber-100 to-amber-200 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+        <div className="w-14 h-14 bg-gradient-to-br from-amber-100 to-amber-200 rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
           <Icon className="text-amber-600" size={28} />
         </div>
       </div>
@@ -89,12 +140,18 @@ const FeatureCard = ({ icon: Icon, title, description, delay = 0 }) => {
       </p>
     </div>
   );
-};
+});
 
-// Image Loading Component with skeleton and error handling
-const ImageWithLoading = ({ src, alt, className = "" }) => {
+// Optimized Image Loading Component
+const ImageWithLoading = React.memo(({ src, alt, className = "" }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+
+  const handleLoad = useCallback(() => setIsLoading(false), []);
+  const handleError = useCallback(() => {
+    setHasError(true);
+    setIsLoading(false);
+  }, []);
 
   return (
     <div className="relative w-full h-full overflow-hidden">
@@ -106,15 +163,12 @@ const ImageWithLoading = ({ src, alt, className = "" }) => {
       <img
         src={src}
         alt={alt}
-        className={`w-full h-full object-cover rounded-lg transition-opacity duration-500 ${
+        className={`w-full h-full object-cover rounded-lg transition-opacity duration-300 ${
           isLoading ? 'opacity-0' : 'opacity-100'
         } ${className}`}
         loading="lazy"
-        onLoad={() => setIsLoading(false)}
-        onError={() => {
-          setHasError(true);
-          setIsLoading(false);
-        }}
+        onLoad={handleLoad}
+        onError={handleError}
       />
       {hasError && (
         <div className="absolute inset-0 bg-gray-200 flex items-center justify-center rounded-lg">
@@ -123,14 +177,13 @@ const ImageWithLoading = ({ src, alt, className = "" }) => {
       )}
     </div>
   );
-};
+});
 
-// Image Grid Component - Fixed layout issues
-const ImageGrid = ({ images }) => {
+// Optimized Image Grid Component
+const ImageGrid = React.memo(({ images }) => {
   return (
-    <div className="w-full md:w-1/2 flex-shrink-0 p-13">
-      <div className="grid grid-cols-3 gap-3 h-80">
-        {/* Large Image on the Left */}
+    <div className="w-full md:w-2/4 flex-shrink-0 p-6">
+      <div className="grid grid-cols-2 gap-3 h-80">
         <div className="col-span-2 h-full overflow-hidden rounded-lg">
           <ImageWithLoading 
             src={images.large} 
@@ -138,59 +191,45 @@ const ImageGrid = ({ images }) => {
             className="w-full h-full object-cover"
           />
         </div>
-        {/* Right column with stacked images */}
-        <div className="flex flex-col gap-3 h-full">
-          <div className="flex-1 overflow-hidden rounded-lg">
-            <ImageWithLoading 
-              src={images.small1} 
-              alt="Interior Detail" 
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="flex-1 overflow-hidden rounded-lg">
-            <ImageWithLoading 
-              src={images.small2} 
-              alt="Interior Decor" 
-              className="w-full h-full object-cover"
-            />
-          </div>
-        </div>
       </div>
     </div>
   );
-};
+});
 
-// Process Card Component - Fixed padding and spacing issues
-const ProcessCard = ({ stepNumber, heading, description, images, isReversed = false }) => {
+// Optimized Process Card Component - Simplified animations
+const ProcessCard = React.memo(({ stepNumber, heading, description, images, isReversed = false }) => {
+  const [ref, isVisible] = useIntersectionObserver();
+
   return (
-    <div className={`bg-white rounded-2xl overflow-hidden flex flex-col ${
-      isReversed ? 'md:flex-row-reverse' : 'md:flex-row'
-    } items-stretch gap-0 mt-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1`}>
-      {/* Text Content */}
+    <div 
+      ref={ref}
+      className={`bg-white rounded-2xl overflow-hidden flex flex-col ${
+        isReversed ? 'md:flex-row-reverse' : 'md:flex-row'
+      } items-stretch gap-0 mt-6 shadow-lg hover:shadow-xl transition-all duration-300 ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+      }`}
+    >
       <div className="w-full md:w-1/2 p-6 lg:p-10 flex flex-col justify-center">
         <div className="flex items-center gap-3 mb-4">
           <span className="text-2xl lg:text-3xl font-bold text-amber-500">{stepNumber}</span>
           <div className="h-px flex-1 bg-gradient-to-r from-amber-500 to-transparent"></div>
         </div>
         <h2 className="text-xl lg:text-2xl font-bold text-gray-900 leading-tight mb-4">{heading}</h2>
-        <p className="text-base text-gray-600 leading-relaxed">
-          {description}
-        </p>
+        <p className="text-base text-gray-600 leading-relaxed">{description}</p>
       </div>
-      {/* Image Grid */}
       <ImageGrid images={images} />
     </div>
   );
-};
+});
 
-// About Section Component - UPDATED with new colors
-const AboutSection = () => {
+// About Section Component
+const AboutSection = React.memo(() => {
   const [titleRef, titleVisible] = useIntersectionObserver();
   const [contentRef, contentVisible] = useIntersectionObserver();
   const [imageRef, imageVisible] = useIntersectionObserver();
   const [statsRef, statsVisible] = useIntersectionObserver();
 
-  const features = [
+  const features = useMemo(() => [
     {
       icon: Users,
       title: "Expert Team",
@@ -211,21 +250,20 @@ const AboutSection = () => {
       title: "Innovation",
       description: "Staying ahead of design trends and incorporating cutting-edge technology to deliver modern, functional, and future-ready interior solutions."
     }
-  ];
+  ], []);
 
-  const stats = [
+  const stats = useMemo(() => [
     { label: "Projects Completed", value: 500, suffix: "+" },
     { label: "Happy Clients", value: 450, suffix: "+" },
     { label: "Years Experience", value: 12, suffix: "" },
     { label: "Design Awards", value: 25, suffix: "+" }
-  ];
+  ], []);
 
   return (
     <section id="about" className="py-16 lg:py-24 bg-gradient-to-br from-gray-50 via-white to-gray-50 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
-        {/* Section Header */}
         <div ref={titleRef} className="text-center mb-16">
-          <div className={`transform transition-all duration-1000 ${
+          <div className={`transform transition-all duration-700 ${
             titleVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}>
             <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-semibold mb-6">
@@ -242,10 +280,8 @@ const AboutSection = () => {
           </div>
         </div>
 
-        {/* Main Content */}
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center mb-20">
-          {/* Content */}
-          <div ref={contentRef} className={`transform transition-all duration-1000 delay-300 ${
+          <div ref={contentRef} className={`transform transition-all duration-700 delay-200 ${
             contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
           }`}>
             <div className="space-y-6 text-lg text-gray-700 leading-relaxed">
@@ -272,33 +308,26 @@ const AboutSection = () => {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-6">
-                <button className="group bg-orange-500 hover:bg-amber-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 hover:shadow-lg transform hover:scale-105">
-                  Start Your Journey
-                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                </button>
-                <button className="border-2 border-gray-300 hover:border-amber-500 text-gray-700 hover:text-amber-600 px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg">
+                <a href="#portfolio" className="group bg-orange-500 hover:bg-amber-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 hover:shadow-lg transform hover:scale-105">
                   View Portfolio
-                </button>
+                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                </a>
               </div>
             </div>
           </div>
 
-          {/* Image */}
-          <div ref={imageRef} className={`transform transition-all duration-1000 delay-500 ${
+          <div ref={imageRef} className={`transform transition-all duration-700 delay-400 ${
             imageVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
           }`}>
             <div className="relative group">
-              {/* Main Image */}
               <div className="relative overflow-hidden rounded-3xl shadow-2xl">
                 <ImageWithLoading 
                   src="src/assets/images/img16.jpg" 
                   alt="Swagruha Interiors Showcase" 
                   className="w-full h-96 lg:h-[500px] object-cover group-hover:scale-105 transition-transform duration-700"
                 />
-                {/* Overlay with floating elements */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
                 
-                {/* Floating Stats Card */}
                 <div className="absolute bottom-6 left-6 right-6 bg-white/95 backdrop-blur-sm rounded-2xl p-4 transform group-hover:scale-105 transition-all duration-500">
                   <div className="flex items-center justify-between text-sm">
                     <div className="text-center">
@@ -317,14 +346,12 @@ const AboutSection = () => {
                 </div>
               </div>
 
-              {/* Decorative Elements */}
               <div className="absolute -top-4 -right-4 w-20 h-20 bg-blue-200 rounded-full opacity-60 group-hover:scale-125 transition-transform duration-500"></div>
               <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-red-300 rounded-full opacity-40 group-hover:scale-125 transition-transform duration-500 delay-100"></div>
             </div>
           </div>
         </div>
 
-        {/* Features Grid */}
         <div className="mb-20">
           <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-6 lg:gap-8">
             {features.map((feature, index) => (
@@ -333,14 +360,13 @@ const AboutSection = () => {
                 icon={feature.icon}
                 title={feature.title}
                 description={feature.description}
-                delay={index * 150}
+                delay={index * 100}
               />
             ))}
           </div>
         </div>
 
-        {/* Stats Section - UPDATED COLORS */}
-        <div ref={statsRef} className={`bg-gradient-to-r from-slate-500 to-slate-600 rounded-3xl p-8 lg:p-12 transform transition-all duration-1000 ${
+        <div ref={statsRef} className={`bg-gradient-to-r from-slate-500 to-slate-600 rounded-3xl p-8 lg:p-12 transform transition-all duration-700 ${
           statsVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
         }`}>
           <div className="text-center mb-8">
@@ -371,7 +397,6 @@ const AboutSection = () => {
             ))}
           </div>
 
-          {/* Trust Indicators */}
           <div className="mt-8 pt-8 border-t border-slate-400/30">
             <div className="flex flex-wrap justify-center items-center gap-6 text-slate-200">
               <div className="flex items-center gap-2">
@@ -392,27 +417,24 @@ const AboutSection = () => {
       </div>
     </section>
   );
-};
+});
 
-// Portfolio Section Component with animations and modern design
-// Portfolio Section Component - Clean version without flickering
-// Portfolio Section Component - Clean version without flickering
-const PortfolioSection = () => {
+// Optimized Portfolio Section with better animations
+const PortfolioSection = React.memo(() => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [selectedProject, setSelectedProject] = useState(null);
-//   const [hoveredProject, setHoveredProject] = useState(null);
   const [sectionRef, sectionVisible] = useIntersectionObserver();
   const [gridRef, gridVisible] = useIntersectionObserver();
 
-  const categories = [
+  const categories = useMemo(() => [
     { id: 'all', name: 'All Projects', icon: '🏠' },
     { id: 'residential', name: 'Residential', icon: '🏡' },
     { id: 'commercial', name: 'Commercial', icon: '🏢' },
     { id: 'luxury', name: 'Luxury', icon: '✨' },
     { id: 'modern', name: 'Modern', icon: '🎨' }
-  ];
+  ], []);
 
-  const projects = [
+  const projects = useMemo(() => [
     {
       id: 1,
       title: "Luxury Villa Interior",
@@ -521,46 +543,44 @@ const PortfolioSection = () => {
       features: ["Panoramic Views", "High-end Finishes", "Custom Design", "Ultra-luxury"],
       client: "Mr. Arjun Mehta"
     }
-  ];
+  ], []);
 
-  const filteredProjects = activeCategory === 'all' 
-    ? projects 
-    : projects.filter(project => project.category === activeCategory);
+  const filteredProjects = useMemo(() => 
+    activeCategory === 'all' 
+      ? projects 
+      : projects.filter(project => project.category === activeCategory),
+    [activeCategory, projects]
+  );
 
-  // Simple Project Card Component - No complex animations
-  const ProjectCard = ({ project, index, onClick }) => {
+  const ProjectCard = React.memo(({ project, index, onClick }) => {
     const [cardRef, cardVisible] = useIntersectionObserver();
 
     return (
       <div
         ref={cardRef}
-        className={`group relative bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
+        className={`group relative bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 cursor-pointer transform transition-all duration-300 hover:scale-102 hover:shadow-xl ${
           cardVisible 
             ? 'opacity-100 translate-y-0' 
             : 'opacity-0 translate-y-8'
         }`}
-        style={{ transitionDelay: `${index * 100}ms` }}
+        style={{ transitionDelay: `${index * 50}ms` }}
         onClick={() => onClick(project)}
       >
-        {/* Image Container */}
         <div className="relative h-64 lg:h-72 overflow-hidden">
           <ImageWithLoading 
             src={project.image} 
             alt={project.title}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
           
-          {/* Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           
-          {/* Category Badge */}
           <div className="absolute top-4 left-4">
             <span className="bg-white/95 backdrop-blur-sm text-amber-600 px-3 py-1 rounded-full text-sm font-semibold">
               {categories.find(cat => cat.id === project.category)?.name}
             </span>
           </div>
           
-          {/* View Project Button */}
           <div className="absolute bottom-4 left-4 right-4 transform transition-all duration-300 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100">
             <button className="w-full bg-white/95 backdrop-blur-sm text-gray-900 px-4 py-2 rounded-xl font-semibold hover:bg-white transition-colors duration-200 flex items-center justify-center gap-2">
               <span>View Project</span>
@@ -569,7 +589,6 @@ const PortfolioSection = () => {
           </div>
         </div>
 
-        {/* Content */}
         <div className="p-6">
           <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-amber-600 transition-colors duration-300">
             {project.title}
@@ -578,7 +597,6 @@ const PortfolioSection = () => {
             {project.description}
           </p>
           
-          {/* Project Details */}
           <div className="space-y-2 text-sm">
             <div className="flex items-center justify-between">
               <span className="text-gray-500">Location:</span>
@@ -594,15 +612,10 @@ const PortfolioSection = () => {
             </div>
           </div>
         </div>
-
-        {/* Simple decorative elements */}
-        <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-amber-200 to-amber-300 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
-        <div className="absolute -bottom-2 -left-2 w-6 h-6 bg-gradient-to-br from-blue-200 to-purple-200 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
       </div>
     );
-  };
+  });
 
-  // Project Modal Component (unchanged)
   const ProjectModal = ({ project, onClose }) => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -611,7 +624,6 @@ const PortfolioSection = () => {
     return (
       <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 overflow-y-auto">
         <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto transform transition-all duration-300">
-          {/* Modal Header */}
           <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center z-10">
             <div>
               <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">{project.title}</h2>
@@ -625,7 +637,6 @@ const PortfolioSection = () => {
             </button>
           </div>
 
-          {/* Image Gallery */}
           <div className="relative h-64 lg:h-96">
             <ImageWithLoading 
               src={project.gallery[currentImageIndex]} 
@@ -633,7 +644,6 @@ const PortfolioSection = () => {
               className="w-full h-full object-cover"
             />
             
-            {/* Image Navigation */}
             {project.gallery.length > 1 && (
               <>
                 <button
@@ -653,7 +663,6 @@ const PortfolioSection = () => {
                   <ChevronRight size={20} />
                 </button>
                 
-                {/* Image Indicators */}
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
                   {project.gallery.map((_, index) => (
                     <button
@@ -669,17 +678,13 @@ const PortfolioSection = () => {
             )}
           </div>
 
-          {/* Project Details */}
           <div className="p-6 space-y-6">
-            {/* Description */}
             <div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Project Overview</h3>
               <p className="text-gray-700 leading-relaxed">{project.description}</p>
             </div>
 
-            {/* Project Info Grid */}
             <div className="grid md:grid-cols-2 gap-6">
-              {/* Project Details */}
               <div className="bg-gray-50 p-4 rounded-xl">
                 <h4 className="font-bold text-gray-900 mb-3">Project Details</h4>
                 <div className="space-y-2 text-sm">
@@ -706,7 +711,6 @@ const PortfolioSection = () => {
                 </div>
               </div>
 
-              {/* Key Features */}
               <div className="bg-amber-50 p-4 rounded-xl">
                 <h4 className="font-bold text-gray-900 mb-3">Key Features</h4>
                 <div className="space-y-2">
@@ -720,12 +724,10 @@ const PortfolioSection = () => {
               </div>
             </div>
 
-            {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-200">
               <button
                 onClick={() => {
                   onClose();
-                  // Trigger quote form
                   document.dispatchEvent(new CustomEvent('openQuoteForm'));
                 }}
                 className="flex-1 bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-xl font-semibold transition-colors duration-200 flex items-center justify-center gap-2"
@@ -748,16 +750,14 @@ const PortfolioSection = () => {
 
   return (
     <section id="portfolio" className="py-16 lg:py-24 bg-gradient-to-br from-white via-gray-50 to-amber-50 overflow-hidden">
-      {/* Background Decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-amber-200 to-amber-300 rounded-full opacity-5" />
         <div className="absolute -bottom-40 -left-40 w-60 h-60 bg-gradient-to-br from-blue-200 to-purple-300 rounded-full opacity-5" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 lg:px-8 relative z-10">
-        {/* Section Header */}
         <div ref={sectionRef} className="text-center mb-16">
-          <div className={`transform transition-all duration-1000 ${
+          <div className={`transform transition-all duration-700 ${
             sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}>
             <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-semibold mb-6">
@@ -774,8 +774,7 @@ const PortfolioSection = () => {
           </div>
         </div>
 
-        {/* Category Filter */}
-        <div className={`flex flex-wrap justify-center gap-3 mb-12 transform transition-all duration-1000 delay-200 ${
+        <div className={`flex flex-wrap justify-center gap-3 mb-12 transform transition-all duration-700 delay-200 ${
           sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
           {categories.map((category) => (
@@ -794,8 +793,7 @@ const PortfolioSection = () => {
           ))}
         </div>
 
-        {/* Projects Grid */}
-        <div ref={gridRef} className={`transform transition-all duration-1000 delay-400 ${
+        <div ref={gridRef} className={`transform transition-all duration-700 delay-400 ${
           gridVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
@@ -810,8 +808,7 @@ const PortfolioSection = () => {
           </div>
         </div>
 
-        {/* Call to Action */}
-        <div className={`text-center mt-16 transform transition-all duration-1000 delay-600 ${
+        <div className={`text-center mt-16 transform transition-all duration-700 delay-600 ${
           gridVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
           <div className="bg-gradient-to-r from-slate-600 to-slate-700 rounded-3xl p-8 lg:p-12 shadow-xl">
@@ -840,13 +837,11 @@ const PortfolioSection = () => {
         </div>
       </div>
 
-      {/* Project Modal */}
       <ProjectModal 
         project={selectedProject} 
         onClose={() => setSelectedProject(null)} 
       />
 
-      {/* Simple CSS */}
       <style jsx>{`
         .line-clamp-2 {
           display: -webkit-box;
@@ -854,24 +849,20 @@ const PortfolioSection = () => {
           -webkit-box-orient: vertical;
           overflow: hidden;
         }
+        .hover\\:scale-102:hover {
+          transform: scale(1.02);
+        }
       `}</style>
     </section>
   );
-};
+});
 
-
-
-// Enhanced Testimonials Section with 6 Cards and Premium Effects
-// Fixed Testimonials Section with Better Hover Effects - UPDATED COLORS
-const TestimonialsSection = () => {
+// Optimized Testimonials Section with smooth animations
+const TestimonialsSection = React.memo(() => {
   const [activeCard, setActiveCard] = useState(0);
-  const [hoveredCard, setHoveredCard] = useState(null);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [destroyingCard, setDestroyingCard] = useState(null);
   const [sectionRef, sectionVisible] = useIntersectionObserver();
-  const [cardsRef, cardsVisible] = useIntersectionObserver();
 
-  const testimonials = [
+  const testimonials = useMemo(() => [
     {
       id: 1,
       name: "Priya Sharma",
@@ -938,37 +929,20 @@ const TestimonialsSection = () => {
       project: "Smart Home Interior",
       duration: "65 days"
     }
-  ];
+  ], []);
 
-  // Slower auto-rotate with destruction effects
+  // Simple auto-rotation
   useEffect(() => {
     const interval = setInterval(() => {
-      if (!isTransitioning && hoveredCard === null) {
-        handleCardTransition();
-      }
-    }, 12000);
+      setActiveCard(prev => (prev + 1) % testimonials.length);
+    }, 5000);
 
     return () => clearInterval(interval);
-  }, [activeCard, isTransitioning, hoveredCard]);
+  }, [testimonials.length]);
 
-  const handleCardTransition = () => {
-    setIsTransitioning(true);
-    setDestroyingCard(activeCard);
-
-    setTimeout(() => {
-      const nextIndex = (activeCard + 1) % testimonials.length;
-      setActiveCard(nextIndex);
-      
-      setTimeout(() => {
-        setDestroyingCard(null);
-        setIsTransitioning(false);
-      }, 800);
-    }, 1500);
-  };
-
-  const StarRating = ({ rating }) => {
+  const StarRating = React.memo(({ rating }) => {
     return (
-      <div className="flex items-center gap-1 mb-4">
+      <div className="flex items-center justify-center gap-1 mb-4">
         {[...Array(5)].map((_, index) => (
           <Star
             key={index}
@@ -977,358 +951,150 @@ const TestimonialsSection = () => {
               index < rating 
                 ? 'text-amber-400 fill-current' 
                 : 'text-gray-300'
-            } transition-colors duration-300`}
+            }`}
           />
         ))}
       </div>
     );
-  };
+  });
 
-  const TestimonialCard = ({ testimonial, index, isActive, isDestroying }) => {
-    const [cardRef, cardVisible] = useIntersectionObserver();
-    const isHovered = hoveredCard === index;
-    const isInBackground = hoveredCard !== null && hoveredCard !== index;
-    
-    // Fixed card state classes with reduced scaling and faster transitions
-    const getCardClasses = () => {
-      let baseClasses = "relative bg-white rounded-2xl p-6 lg:p-8 border border-gray-100 transform transition-all duration-300 ease-out cursor-pointer";
-      
-      if (isDestroying) {
-        return `${baseClasses} opacity-0 scale-75 -rotate-12 translate-y-12 blur-sm shadow-none`;
-      }
-      
-      if (isHovered) {
-        return `${baseClasses} opacity-100 scale-105 shadow-xl ring-2 ring-amber-300 z-30 bg-gradient-to-br from-white to-amber-50/30`;
-      }
-      
-      if (isInBackground) {
-        return `${baseClasses} opacity-40 scale-98 blur-sm shadow-md z-5`;
-      }
-      
-      if (isActive) {
-        return `${baseClasses} opacity-100 scale-102 shadow-lg ring-1 ring-amber-200 z-20`;
-      }
-      
-      return `${baseClasses} opacity-90 scale-100 shadow-md hover:shadow-lg z-10`;
-    };
-
+  const TestimonialCard = React.memo(({ testimonial, index }) => {
     return (
-      <div
-        ref={cardRef}
-        className={`${getCardClasses()} ${
-          cardVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-        }`}
-        style={{ 
-          transitionDelay: cardVisible ? `${index * 100}ms` : '0ms', // Faster stagger
-          animation: (isActive || isHovered) ? 'subtle-glow 4s infinite' : 'none',
-          transformOrigin: 'center center',
-          filter: isInBackground ? 'blur(1px)' : 'blur(0px)',
-          // Reduced and softer box shadows
-          boxShadow: isHovered ? 
-            '0 10px 20px -6px rgba(0, 0, 0, 0.10), 0 0 0 1px rgba(71, 85, 105, 0.15), 0 0 20px rgba(71, 85, 105, 0.07)' :
-        isActive ? 
-            '0 8px 18px -6px rgba(0, 0, 0, 0.09), 0 0 12px rgba(71, 85, 105, 0.06)' :
-            '0 3px 10px -4px rgba(0, 0, 0, 0.05)',
-
-        backgroundColor: isHovered ? 'rgba(248, 250, 252, 0.8)' : 'rgba(255, 255, 255, 0.95)',
-        border: isActive ? '1px solid rgba(71, 85, 105, 0.2)' : '1px solid rgba(226, 232, 240, 0.5)'
-        }}
-        onMouseEnter={() => {
-          if (!isTransitioning) {
-            setHoveredCard(index);
-            setActiveCard(index);
-          }
-        }}
-        onMouseLeave={() => {
-          setHoveredCard(null);
-        }}
-      >
-        {/* Subtle glowing border effect */}
-        {(isHovered || isActive) && (
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-amber-100 via-amber-200 to-amber-100 opacity-15 animate-pulse blur-sm -z-10"></div>
-        )}
-
-        {/* Destruction Particle Effects */}
-        {isDestroying && (
-          <>
-            {[...Array(12)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute w-2 h-2 bg-gradient-to-r from-amber-400 to-amber-600 rounded-full animate-ping"
-                style={{
-                  top: `${Math.random() * 100}%`,
-                  left: `${Math.random() * 100}%`,
-                  animationDelay: `${i * 80}ms`,
-                  animationDuration: '1s'
-                }}
-              />
-            ))}
-          </>
-        )}
-
-        {/* Smaller decorative elements */}
-        <div className={`absolute -top-3 -right-3 w-16 h-16 bg-gradient-to-br from-amber-200 to-amber-300 rounded-full opacity-15 transition-all duration-500 ${
-          isHovered ? 'animate-spin-slow scale-125 opacity-25' : 'animate-pulse'
-        }`}></div>
-        <div className={`absolute -bottom-2 -left-2 w-12 h-12 bg-gradient-to-br from-blue-200 to-purple-200 rounded-full opacity-10 transition-all duration-500 ${
-          isHovered ? 'animate-bounce-slow scale-110 opacity-20' : ''
-        }`}></div>
-        
-        {/* Smaller quote icon */}
-        <div className={`absolute top-4 left-4 w-10 h-10 bg-gradient-to-br from-amber-100 to-amber-200 rounded-xl flex items-center justify-center transition-all duration-300 ${
-          isHovered ? 'shadow-amber-300 shadow-md scale-110' : 'shadow-amber-200 shadow-sm'
-        }`}>
+      <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-md hover:shadow-xl hover:scale-105 hover:-translate-y-2 transition-all duration-300 ease-out h-full group">
+        {/* Quote Icon */}
+        <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center mb-4">
           <span className="text-xl text-amber-600 font-bold">"</span>
         </div>
 
-        {/* Smaller client image */}
-        <div className="flex justify-center mb-5 mt-4">
-          <div className="relative">
-            <div className={`w-20 h-20 rounded-full overflow-hidden border-3 transition-all duration-300 ${
-              isHovered ? 'border-amber-400 shadow-amber-200 shadow-md scale-110' : 'border-amber-200 shadow-sm'
-            }`}>
-              <ImageWithLoading 
-                src={testimonial.image} 
-                alt={testimonial.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            
-            {/* Smaller online indicator */}
-            <div className={`absolute -bottom-1 -right-1 w-6 h-6 bg-gradient-to-r from-green-400 to-green-500 rounded-full border-2 border-white shadow-sm transition-all duration-300 ${
-              isHovered ? 'scale-110' : ''
-            }`}>
-              <div className="w-full h-full rounded-full bg-green-500 animate-ping opacity-60"></div>
-            </div>
-            
-            {/* Subtle halo effect */}
-            {isHovered && (
-              <div className="absolute inset-0 rounded-full bg-amber-300 opacity-20 animate-ping scale-125"></div>
-            )}
+        {/* Client Image */}
+        <div className="flex justify-center mb-4">
+          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-amber-200">
+            <ImageWithLoading 
+              src={testimonial.image} 
+              alt={testimonial.name}
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
 
-        {/* Enhanced Rating */}
-        <div className="flex justify-center">
-          <StarRating rating={testimonial.rating} />
-        </div>
+        {/* Star Rating */}
+        <StarRating rating={testimonial.rating} />
 
-        {/* Quote with subtle enhancement */}
-        <p className={`text-base leading-relaxed mb-6 text-center italic font-medium transition-all duration-300 ${
-          isHovered ? 'text-gray-900 font-semibold' : 'text-gray-700'
-        }`}>
+        {/* Quote */}
+        <p className="text-gray-700 text-center italic mb-6 leading-relaxed">
           "{testimonial.quote}"
         </p>
 
-        {/* Improved client info card */}
-        <div className={`text-center mb-5 p-3 rounded-xl transition-all duration-300 ${
-          isHovered ? 
-          'bg-gradient-to-r from-amber-50/50 to-white border border-amber-100' :
-          'bg-gradient-to-r from-gray-50/50 to-white'
-        }`}>
-          <h4 className={`text-lg font-bold mb-1 transition-all duration-300 ${
-            isHovered ? 'text-amber-800' : 'text-gray-900'
-          }`}>
+        {/* Client Info */}
+        <div className="text-center mb-4 p-3 bg-gray-50 rounded-lg">
+          <h4 className="text-lg font-bold text-gray-900 mb-1">
             {testimonial.name}
           </h4>
-          <p className={`font-semibold mb-1 transition-all duration-300 ${
-            isHovered ? 'text-amber-700' : 'text-amber-600'
-          }`}>
+          <p className="font-semibold text-amber-600 mb-1">
             {testimonial.role}
           </p>
-          <p className={`text-sm transition-all duration-300 ${
-            isHovered ? 'text-gray-700' : 'text-gray-500'
-          }`}>
+          <p className="text-sm text-gray-500">
             📍 {testimonial.location}
           </p>
         </div>
 
-        {/* Improved project details card */}
-        <div className={`rounded-xl p-4 space-y-2 transition-all duration-300 border ${
-          isHovered ? 
-          'bg-gradient-to-r from-amber-50/30 to-white border-amber-150' :
-          'bg-gradient-to-r from-gray-50/50 to-gray-100/50 border-gray-150'
-        }`}>
-          <div className="flex items-center justify-between text-sm">
-            <span className={`font-medium transition-all duration-300 ${
-              isHovered ? 'text-amber-700' : 'text-gray-600'
-            }`}>Project:</span>
-            <span className={`font-semibold transition-all duration-300 ${
-              isHovered ? 'text-amber-800' : 'text-gray-800'
-            }`}>{testimonial.project}</span>
+        {/* Project Details */}
+        <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="font-medium text-gray-600">Project:</span>
+            <span className="font-semibold text-gray-800">{testimonial.project}</span>
           </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className={`font-medium transition-all duration-300 ${
-              isHovered ? 'text-amber-700' : 'text-gray-600'
-            }`}>Duration:</span>
-            <span className={`font-semibold transition-all duration-300 ${
-              isHovered ? 'text-amber-800' : 'text-amber-600'
-            }`}>{testimonial.duration}</span>
+          <div className="flex justify-between text-sm">
+            <span className="font-medium text-gray-600">Duration:</span>
+            <span className="font-semibold text-amber-600">{testimonial.duration}</span>
           </div>
         </div>
 
-        {/* Smaller verified badge */}
-        <div className="absolute top-4 right-4">
-          <div className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 transition-all duration-300 ${
-            isHovered ? 
-            'bg-gradient-to-r from-green-200 to-green-300 text-green-900 scale-105' :
-            'bg-gradient-to-r from-green-100 to-green-200 text-green-800'
-          }`}>
+        {/* Verified Badge */}
+        <div className="flex justify-center mt-4">
+          <div className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold flex items-center gap-1">
             <CheckCircle2 size={12} />
             Verified
           </div>
         </div>
       </div>
     );
-  };
+  });
+
+  const stats = useMemo(() => [
+    { label: "Client Satisfaction", value: "98%" },
+    { label: "On-Time Delivery", value: "100%" },
+    { label: "Repeat Clients", value: "95%" },
+    { label: "Average Rating", value: "4.9★" }
+  ], []);
 
   return (
-    <section id="testimonials" className="py-16 lg:py-24 bg-gradient-to-br from-gray-50 via-white to-amber-50 overflow-hidden relative">
-      {/* Background Decorations */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-amber-200 to-amber-300 rounded-full opacity-8 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-60 h-60 bg-gradient-to-br from-blue-200 to-purple-300 rounded-full opacity-8 animate-bounce-slow"></div>
-        <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-gradient-to-br from-purple-200 to-pink-200 rounded-full opacity-5 animate-spin-slow"></div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 lg:px-8 relative z-10">
+    <section id="testimonials" className="py-16 lg:py-24 bg-gradient-to-b from-gray-50 to-white">
+      <div className="max-w-7xl mx-auto px-4 lg:px-8">
         {/* Section Header */}
         <div ref={sectionRef} className="text-center mb-16">
-          <div className={`transform transition-all duration-800 ${
-            sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          <div className={`transition-opacity duration-700 ${
+            sectionVisible ? 'opacity-100' : 'opacity-0'
           }`}>
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800 px-5 py-2 rounded-full text-sm font-semibold mb-6 shadow-sm">
-              <Heart size={16} className="fill-current animate-pulse" />
+            <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+              <Heart size={16} className="fill-current" />
               Client Testimonials
             </div>
-            <h2 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
               What Our Clients
               <span className="block text-amber-600">Say About Us</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Real stories from real clients who trusted us with their dream spaces
             </p>
           </div>
         </div>
 
-        {/* 6-Card Testimonials Grid */}
-        <div ref={cardsRef} className={`transform transition-all duration-800 delay-200 ${
-          cardsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-        }`}>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
-            {testimonials.map((testimonial, index) => (
-              <TestimonialCard
-                key={testimonial.id}
-                testimonial={testimonial}
-                index={index}
-                isActive={activeCard === index}
-                isDestroying={destroyingCard === index}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Navigation Dots */}
-        <div className="flex justify-center mt-12 space-x-3">
-          {testimonials.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => {
-                if (!isTransitioning) {
-                  setActiveCard(index);
-                }
-              }}
-              className={`relative transition-all duration-300 ${
-                index === activeCard
-                  ? 'w-8 h-3 bg-gradient-to-r from-amber-500 to-amber-600 rounded-full scale-110'
-                  : 'w-3 h-3 bg-gray-300 rounded-full hover:bg-gray-400'
-              }`}
-            >
-              {index === activeCard && (
-                <div className="absolute inset-0 bg-amber-400 rounded-full animate-ping opacity-60"></div>
-              )}
-            </button>
+        {/* Testimonials Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          {testimonials.map((testimonial, index) => (
+            <TestimonialCard
+              key={testimonial.id}
+              testimonial={testimonial}
+              index={index}
+            />
           ))}
         </div>
 
-        {/* Stats Footer - UPDATED COLORS */}
-        <div className="mt-20 bg-gradient-to-r from-slate-600 to-slate-700 rounded-3xl p-8 lg:p-12 shadow-xl">
-          <div className="text-center mb-10">
-            <h3 className="text-3xl lg:text-4xl font-bold text-white mb-4">
-              Client Satisfaction Statistics
-            </h3>
-            <p className="text-slate-200 text-lg max-w-2xl mx-auto">
-              Numbers that speak for our commitment to excellence
-            </p>
-          </div>
+        
+        {/* Statistics Section */}
+        <div className="bg-slate-700 rounded-2xl p-8 lg:p-12 text-center">
+          <h3 className="text-3xl font-bold text-white mb-4">
+            Client Satisfaction Statistics
+          </h3>
+          <p className="text-slate-200 mb-8 max-w-2xl mx-auto">
+            Numbers that speak for our commitment to excellence
+          </p>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="text-center group">
-              <div className="text-3xl lg:text-4xl font-bold text-amber-400 mb-2">98%</div>
-              <p className="text-slate-200 font-medium group-hover:text-white transition-colors duration-300">
-                Client Satisfaction
-              </p>
-            </div>
-            <div className="text-center group">
-              <div className="text-3xl lg:text-4xl font-bold text-amber-400 mb-2">100%</div>
-              <p className="text-slate-200 font-medium group-hover:text-white transition-colors duration-300">
-                On-Time Delivery
-              </p>
-            </div>
-            <div className="text-center group">
-              <div className="text-3xl lg:text-4xl font-bold text-amber-400 mb-2">95%</div>
-              <p className="text-slate-200 font-medium group-hover:text-white transition-colors duration-300">
-                Repeat Clients
-              </p>
-            </div>
-            <div className="text-center group">
-              <div className="text-3xl lg:text-4xl font-bold text-amber-400 mb-2">4.9★</div>
-              <p className="text-slate-200 font-medium group-hover:text-white transition-colors duration-300">
-                Average Rating
-              </p>
-            </div>
+            {stats.map((stat, index) => (
+              <div key={stat.label} className="text-center">
+                <div className="text-3xl lg:text-4xl font-bold text-amber-400 mb-2">
+                  {stat.value}
+                </div>
+                <p className="text-slate-200 font-medium">
+                  {stat.label}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
-
-      {/* Optimized Custom CSS */}
-      <style jsx>{`
-        @keyframes subtle-glow {
-          0%, 100% { 
-            box-shadow: 0 0 15px rgba(251, 191, 36, 0.15); 
-          }
-          50% { 
-            box-shadow: 0 0 25px rgba(251, 191, 36, 0.25); 
-          }
-        }
-        
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        
-        @keyframes bounce-slow {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-8px); }
-        }
-        
-        .animate-spin-slow {
-          animation: spin-slow 15s linear infinite;
-        }
-        
-        .animate-bounce-slow {
-          animation: bounce-slow 3s ease-in-out infinite;
-        }
-      `}</style>
     </section>
   );
-};
+});
 
-const FAQSection = () => {
+// FAQ Section - Optimized
+const FAQSection = React.memo(() => {
   const [openFAQ, setOpenFAQ] = useState(null);
   const [sectionRef, sectionVisible] = useIntersectionObserver();
 
-  const faqCategories = [
+  const faqCategories = useMemo(() => [
     {
       title: "Services & Expertise",
       icon: "🎨",
@@ -1401,19 +1167,18 @@ const FAQSection = () => {
         }
       ]
     }
-  ];
+  ], []);
 
-  const toggleFAQ = (categoryIndex, questionIndex) => {
+  const toggleFAQ = useCallback((categoryIndex, questionIndex) => {
     const key = `${categoryIndex}-${questionIndex}`;
     setOpenFAQ(openFAQ === key ? null : key);
-  };
+  }, [openFAQ]);
 
   return (
     <section id="faq" className="py-16 lg:py-24 bg-gradient-to-br from-slate-50 via-white to-amber-50">
       <div className="max-w-6xl mx-auto px-4 lg:px-8">
-        {/* Section Header */}
         <div ref={sectionRef} className="text-center mb-16">
-          <div className={`transform transition-all duration-1000 ${
+          <div className={`transform transition-all duration-700 ${
             sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}>
             <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-semibold mb-6">
@@ -1430,16 +1195,14 @@ const FAQSection = () => {
           </div>
         </div>
 
-        {/* FAQ Categories */}
         <div className="grid lg:grid-cols-2 gap-8">
           {faqCategories.map((category, categoryIndex) => (
             <div
               key={categoryIndex}
-              className={`transform transition-all duration-1000 delay-${(categoryIndex + 1) * 100} ${
+              className={`transform transition-all duration-700 delay-${(categoryIndex + 1) * 100} ${
                 sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}
             >
-              {/* Category Header */}
               <div className="bg-white rounded-t-2xl border-l-4 border-amber-500 p-6 shadow-lg">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{category.icon}</span>
@@ -1447,7 +1210,6 @@ const FAQSection = () => {
                 </div>
               </div>
 
-              {/* Questions */}
               <div className="bg-white border-l-4 border-amber-500 shadow-lg rounded-b-2xl overflow-hidden">
                 {category.questions.map((faq, questionIndex) => {
                   const isOpen = openFAQ === `${categoryIndex}-${questionIndex}`;
@@ -1484,8 +1246,7 @@ const FAQSection = () => {
           ))}
         </div>
 
-        {/* CTA Section */}
-        <div className={`text-center mt-16 transform transition-all duration-1000 delay-600 ${
+        <div className={`text-center mt-16 transform transition-all duration-700 delay-600 ${
           sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
           <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-3xl p-8 shadow-xl">
@@ -1497,14 +1258,13 @@ const FAQSection = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button 
-                onClick={() => setFormOpen(true)}
                 className="bg-white text-amber-600 px-8 py-3 rounded-xl font-semibold hover:bg-amber-50 transition-colors duration-200 flex items-center justify-center gap-2"
               >
                 <MessageCircle size={18} />
-                <span>Start Free Consultation</span>
+                <span onClick={() => document.dispatchEvent(new CustomEvent('openQuoteForm'))} >Start Free Consultation</span>
               </button>
               <a 
-                href="tel:+919876543210"
+                href="tel:+917411624897"
                 className="border-2 border-white text-white hover:bg-white hover:text-amber-600 px-8 py-3 rounded-xl font-semibold transition-colors duration-200 flex items-center justify-center gap-2"
               >
                 <Phone size={18} />
@@ -1516,14 +1276,13 @@ const FAQSection = () => {
       </div>
     </section>
   );
-};
+});
 
-// Footer Section Component with modern theme matching
-const FooterSection = () => {
+// Footer Section Component
+const FooterSection = React.memo(() => {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [sectionRef, sectionVisible] = useIntersectionObserver();
 
-  // Show/hide back to top button based on scroll position
   useEffect(() => {
     const handleScroll = () => {
       setShowBackToTop(window.pageYOffset > 300);
@@ -1533,43 +1292,41 @@ const FooterSection = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleBackToTop = () => {
+  const handleBackToTop = useCallback(() => {
     window.scrollTo({
       top: 0,
       behavior: 'smooth'
     });
-  };
+  }, []);
 
-  const handleNavClick = (href) => {
+  const handleNavClick = useCallback((href) => {
     const element = document.querySelector(href);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
-  };
+  }, []);
 
-  // Navigation to Google Maps
-  const handleNavigateToLocation = () => {
-    const address = "123 Design Avenue, Mumbai, Maharashtra 400001";
+  const handleNavigateToLocation = useCallback(() => {
+    const address = "Shed No. 5, Plot No. 288/2, Muthanallur Cross, Dommasandra, Bengaluru, Karnataka 562125";
     const encodedAddress = encodeURIComponent(address);
     window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`, '_blank');
-  };
+  }, []);
 
-  const handleOpenInGoogleMaps = () => {
-    const address = "123 Design Avenue, Mumbai, Maharashtra 400001";
+  const handleOpenInGoogleMaps = useCallback(() => {
+    const address = "Shed No. 5, Plot No. 288/2, Muthanallur Cross, Dommasandra, Bengaluru, Karnataka 562125";
     const encodedAddress = encodeURIComponent(address);
     window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
-  };
+  }, []);
 
-  // Footer data
-  const footerLinks = {
+  const footerLinks = useMemo(() => ({
     company: [
-        { name: 'Home', href: '#home', isButton: false },
-        { name: 'How It Works', href: '#how-it-works', isButton: false },
-        { name: 'About', href: '#about', isButton: false },
-        { name: 'Portfolio', href: '#portfolio', isButton: false },
-        { name: 'Testimonials', href: '#testimonials', isButton: false },
-        { name: 'FAQ', href: '#faq', isButton: false },
-        { name: 'Get Quote', href: '#get-quote', isButton: true },
+      { name: 'Home', href: '#home', isButton: false },
+      { name: 'How It Works', href: '#how-it-works', isButton: false },
+      { name: 'About', href: '#about', isButton: false },
+      { name: 'Portfolio', href: '#portfolio', isButton: false },
+      { name: 'Testimonials', href: '#testimonials', isButton: false },
+      { name: 'FAQ', href: '#faq', isButton: false },
+      { name: 'Get Quote', href: '#get-quote', isButton: true },
     ],
     services: [
       { name: 'Residential Design', href: '#services' },
@@ -1577,49 +1334,36 @@ const FooterSection = () => {
       { name: 'Space Planning', href: '#services' },
       { name: 'Furniture Selection', href: '#services' },
       { name: 'Consultation', href: '#services' }
-    ],
-    resources: [
-      { name: 'Design Blog', href: '#blog' },
-      { name: 'Interior Tips', href: '#tips' },
-      { name: 'Style Guide', href: '#guide' },
-      { name: 'Maintenance', href: '#maintenance' },
-      { name: 'Warranty', href: '#warranty' }
     ]
-  };
+  }), []);
 
-  const contactInfo = [
+  const contactInfo = useMemo(() => [
     { 
       icon: <MapPin size={18} className="text-amber-400" />, 
-      text: '123 Design Avenue, Mumbai, Maharashtra 400001',
+      text: 'Shed No. 5, Plot No. 288/2, Muthanallur Cross, Dommasandra, Bengaluru, Karnataka 562125',
       action: handleOpenInGoogleMaps,
       type: 'location'
     },
     { 
       icon: <Phone size={18} className="text-amber-400" />, 
-      text: '+91 98765 43210',
-      action: () => window.open('tel:+919876543210'),
+      text: '+91 7411624897',
+      action: () => window.open('tel:+917411624897'),
       type: 'phone'
     },
     { 
       icon: <Mail size={18} className="text-amber-400" />, 
-      text: 'hello@swagruhainteriors.com',
-      action: () => window.open('mailto:hello@swagruhainteriors.com'),
+      text: 'swagruhainteriors@gmail.com',
+      action: () => window.open('mailto:swagruhainteriors@gmail.com'),
       type: 'email'
     },
     { 
       icon: <Clock size={18} className="text-amber-400" />, 
-      text: 'Mon - Sat: 9:00 AM - 7:00 PM',
+      text: 'Mon - Sat: 9:00 AM - 6:00 PM',
       type: 'hours'
     }
-  ];
+  ], [handleOpenInGoogleMaps]);
 
-  const socialLinks = [
-    { 
-      name: 'Facebook', 
-      icon: <Instagram size={20} />, 
-      href: 'https://facebook.com/swagruhainteriors',
-      color: 'hover:bg-blue-600'
-    },
+  const socialLinks = useMemo(() => [
     { 
       name: 'Instagram', 
       icon: <Instagram size={20} />, 
@@ -1628,7 +1372,7 @@ const FooterSection = () => {
     },
     { 
       name: 'Twitter', 
-      icon: <Twitter size={20} />, 
+      icon: <X size={20} />, 
       href: 'https://twitter.com/swagruhainteriors',
       color: 'hover:bg-blue-500'
     },
@@ -1638,34 +1382,29 @@ const FooterSection = () => {
       href: 'https://linkedin.com/company/swagruhainteriors',
       color: 'hover:bg-blue-700'
     }
-  ];
+  ], []);
 
-  const achievements = [
+  const achievements = useMemo(() => [
     { number: '500+', label: 'Projects Completed' },
     { number: '50+', label: 'Happy Clients' },
     { number: '15+', label: 'Years Experience' },
     { number: '25+', label: 'Design Awards' }
-  ];
+  ], []);
 
   return (
     <>
       <footer className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden">
-        {/* Background Decorations */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-amber-500/10 to-amber-600/5 rounded-full blur-3xl" />
           <div className="absolute -bottom-40 -left-40 w-60 h-60 bg-gradient-to-br from-slate-600/10 to-slate-700/5 rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-amber-500/5 to-transparent rounded-full blur-3xl" />
         </div>
 
         <div className="relative z-10">
-
-          {/* Main Footer Content */}
           <div ref={sectionRef} className="max-w-7xl mx-auto px-4 lg:px-8 py-16">
-            <div className={`grid lg:grid-cols-4 md:grid-cols-2 gap-8 lg:gap-12 transform transition-all duration-1000 ${
+            <div className={`grid lg:grid-cols-4 md:grid-cols-2 gap-8 lg:gap-12 transform transition-all duration-700 ${
               sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}>
               
-              {/* Company Info */}
               <div className="lg:col-span-1 space-y-6">
                 <div>
                   <h3 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
@@ -1677,7 +1416,6 @@ const FooterSection = () => {
                     Experience luxury living with our expert interior design services.
                   </p>
                   
-                  {/* Social Links */}
                   <div className="flex gap-3">
                     {socialLinks.map((social) => (
                       <a
@@ -1694,7 +1432,6 @@ const FooterSection = () => {
                   </div>
                 </div>
 
-                {/* Achievements */}
                 <div className="grid grid-cols-2 gap-4">
                   {achievements.map((achievement, index) => (
                     <div key={index} className="text-center">
@@ -1705,7 +1442,6 @@ const FooterSection = () => {
                 </div>
               </div>
 
-              {/* Quick Links */}
               <div>
                 <h4 className="text-lg font-bold text-white mb-6">Company</h4>
                 <ul className="space-y-3">
@@ -1727,7 +1463,6 @@ const FooterSection = () => {
                 </ul>
               </div>
 
-              {/* Services */}
               <div>
                 <h4 className="text-lg font-bold text-white mb-6">Our Services</h4>
                 <ul className="space-y-3">
@@ -1749,7 +1484,6 @@ const FooterSection = () => {
                 </ul>
               </div>
 
-              {/* Contact Info */}
               <div>
                 <h4 className="text-lg font-bold text-white mb-6">Get In Touch</h4>
                 <div className="space-y-4">
@@ -1771,17 +1505,16 @@ const FooterSection = () => {
                   ))}
                 </div>
 
-                {/* Quick Contact Buttons */}
                 <div className="mt-6 flex flex-col gap-3">
                   <button 
-                    onClick={() => window.open('tel:+919876543210')}
+                    onClick={() => window.open('tel:+917411624897')}
                     className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 flex items-center justify-center gap-2"
                   >
                     <Phone size={16} />
                     Call Now
                   </button>
                   <button 
-                    onClick={() => window.open('https://wa.me/919876543210')}
+                    onClick={() => window.open('https://wa.me/917411624897')}
                     className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 flex items-center justify-center gap-2"
                   >
                     <MessageCircle size={16} />
@@ -1791,8 +1524,7 @@ const FooterSection = () => {
               </div>
             </div>
 
-            {/* Map Section */}
-            <div className={`mt-12 transform transition-all duration-1000 delay-300 ${
+            <div className={`mt-12 transform transition-all duration-700 delay-300 ${
               sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}>
               <h4 className="text-2xl font-bold text-white mb-6 text-center">Visit Our Factory</h4>
@@ -1807,7 +1539,6 @@ const FooterSection = () => {
                     title="Our Office Location"
                   />
                   
-                  {/* Map Overlay Buttons */}
                   <div className="absolute bottom-4 right-4 flex gap-2">
                     <button
                       onClick={handleNavigateToLocation}
@@ -1829,7 +1560,6 @@ const FooterSection = () => {
             </div>
           </div>
 
-          {/* Footer Bottom */}
           <div className="border-t border-slate-700 bg-slate-900 flex">
             <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8">
               <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
@@ -1841,7 +1571,6 @@ const FooterSection = () => {
           </div>
         </div>
 
-        {/* Back to Top Button */}
         <button
           className={`fixed bottom-8 right-8 w-12 h-12 bg-amber-500 hover:bg-amber-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 z-50 flex items-center justify-center group ${
             showBackToTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
@@ -1854,11 +1583,11 @@ const FooterSection = () => {
       </footer>
     </>
   );
-};
+});
 
 // Connect With Us Modal Component
-const ConnectWithUsModal = ({ isOpen, onClose }) => {
-  const socialLinks = [
+const ConnectWithUsModal = React.memo(({ isOpen, onClose }) => {
+  const socialLinks = useMemo(() => [
     {
       name: 'Instagram',
       icon: Instagram,
@@ -1883,37 +1612,36 @@ const ConnectWithUsModal = ({ isOpen, onClose }) => {
     {
       name: 'Whatsapp',
       icon: MessageCircle,
-      href: 'https://whatsapp.com/u/swagruhainteriors',
+      href: 'https://wa.me/917411624897',
       color: 'bg-gradient-to-r from-green-500 to-green-600',
       hoverColor: 'hover:from-green-600 hover:to-green-700'
     }
-  ];
+  ], []);
 
-  const contactMethods = [
+  const contactMethods = useMemo(() => [
     {
       name: 'Phone Call',
       icon: Phone,
-      href: 'tel:+91XXXXXXXXXX',
+      href: 'tel:+917411624897',
       color: 'bg-gradient-to-r from-green-500 to-green-600',
       hoverColor: 'hover:from-green-600 hover:to-green-700',
-      text: '+91 XXXX XXXXXX'
+      text: '+91 7411624897'
     },
     {
       name: 'Email',
       icon: Mail,
-      href: 'mailto:contact@swagruhainteriors.com',
+      href: 'mailto:swagruhainteriors@gmail.com',
       color: 'bg-gradient-to-r from-gray-600 to-gray-800',
       hoverColor: 'hover:from-gray-700 hover:to-gray-900',
-      text: 'contact@swagruhainteriors.com'
+      text: 'swagruhainteriors@gmail.com'
     }
-  ];
+  ], []);
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl p-6 lg:p-8 w-full max-w-lg transform transition-all duration-300">
-        {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
             <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">Connect With Us</h2>
@@ -1927,7 +1655,6 @@ const ConnectWithUsModal = ({ isOpen, onClose }) => {
           </button>
         </div>
 
-        {/* Social Media Links */}
         <div className="space-y-4 mb-6">
           <h3 className="text-lg font-semibold text-gray-800 mb-3">Social Media</h3>
           <div className="grid grid-cols-2 gap-3">
@@ -1946,7 +1673,6 @@ const ConnectWithUsModal = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        {/* Contact Methods */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-gray-800 mb-3">Direct Contact</h3>
           <div className="space-y-3">
@@ -1966,7 +1692,6 @@ const ConnectWithUsModal = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="w-full mt-6 bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-lg font-semibold transition-colors duration-200"
@@ -1976,21 +1701,10 @@ const ConnectWithUsModal = ({ isOpen, onClose }) => {
       </div>
     </div>
   );
-};
+});
 
-const Landing = () => {
-  // Hero slider images
-  const heroImages = [
-    "src/assets/images/img18.jpg",
-    "src/assets/images/img19.jpg", 
-    "src/assets/images/img20.jpg",
-    "src/assets/images/img21.jpg"
-  ];
-  
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [formOpen, setFormOpen] = useState(false);
-  const [connectModalOpen, setConnectModalOpen] = useState(false);
+// Enhanced Quote Form Component with Validation
+const QuoteFormModal = React.memo(({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -2001,7 +1715,415 @@ const Landing = () => {
     message: ''
   });
 
-  // Auto-slide functionality
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [alert, setAlert] = useState(null);
+
+  const validateForm = useCallback(() => {
+    const newErrors = {};
+
+    // Name validation
+    if (!formData.name.trim()) {
+      newErrors.name = 'Full name is required';
+    } else if (!validateName(formData.name)) {
+      newErrors.name = 'Please enter a valid name (letters and spaces only, minimum 2 characters)';
+    }
+
+    // Email validation
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email address is required';
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    // Phone validation
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    } else if (!validatePhone(formData.phone)) {
+      newErrors.phone = 'Please enter a valid phone number (minimum 10 digits)';
+    }
+
+    // Project type validation
+    if (!formData.projectType) {
+      newErrors.projectType = 'Please select a project type';
+    }
+
+    // Message validation (optional but if provided, should be meaningful)
+    if (formData.message && formData.message.trim().length < 10) {
+      newErrors.message = 'Please provide more details about your project (minimum 10 characters)';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [formData]);
+
+  const handleInputChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear error for this field when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  }, [errors]);
+
+  const handleFormSubmit = useCallback(async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      setAlert({
+        type: 'error',
+        message: 'Please fix the errors below and try again.'
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+
+      // Simulate a brief delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      // Success message UI
+    setAlert({
+      type: 'success',
+      message: 'Thank you! Your quote request has been submitted successfully. We will contact you within 24 hours.'
+    });
+
+    // Prepare WhatsApp message after user confirmation
+    const whatsappMessage = `🏠 *New Quote Request - Swagruha Interiors*
+... // (same message generation logic as before)
+`;
+    const encodedMessage = encodeURIComponent(whatsappMessage);
+    const whatsappNumber = '917411624897';
+    const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+
+    // Reset form for user
+    setFormData({
+      name: '', email: '', phone: '', projectType: '', budget: '', timeline: '', message: ''
+    });
+    setErrors({});
+
+    // Close form/modal after 1.5-2 seconds (user sees success)
+    setTimeout(() => {
+      onClose();
+      setAlert(null);
+      // NOW open WhatsApp **after** closing the form & clearing alert!
+      window.open(whatsappURL, '_blank');
+    }, 1800);
+      
+      // // Success
+      // setAlert({
+      //   type: 'success',
+      //   message: 'Thank you! Your quote request has been submitted successfully. We will contact you within 24 hours.'
+      // });
+      
+      // // Reset form
+      // setFormData({
+      //   name: '', email: '', phone: '', projectType: '', budget: '', timeline: '', message: ''
+      // });
+      // setErrors({});
+      
+      // // Close form after 3 seconds
+      // setTimeout(() => {
+      //   onClose();
+      //   setAlert(null);
+      // }, 3000);
+      
+    } catch (error) {
+      setAlert({
+        type: 'error',
+        message: 'Sorry, there was an error submitting your request. Please try again or call us directly.'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [formData, validateForm, onClose]);
+
+  const closeAlert = useCallback(() => {
+    setAlert(null);
+  }, []);
+
+  // Reset form when modal opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData({
+        name: '', email: '', phone: '', projectType: '', budget: '', timeline: '', message: ''
+      });
+      setErrors({});
+      setAlert(null);
+      setIsSubmitting(false);
+    }
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <>
+      {alert && <Alert type={alert.type} message={alert.message} onClose={closeAlert} />}
+      
+      <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl p-6 lg:p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all duration-300">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">Get Your Free Quote</h2>
+              <p className="text-gray-600 mt-1">Tell us about your project and we'll provide a detailed estimate</p>
+            </div>
+            <button
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200 disabled:opacity-50"
+            >
+              <X size={24} />
+            </button>
+          </div>
+
+          <form onSubmit={handleFormSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                    errors.name 
+                      ? 'border-red-500 focus:border-red-500' 
+                      : 'border-gray-200 focus:border-amber-500'
+                  }`}
+                  placeholder="Enter your full name"
+                />
+                {errors.name && (
+                  <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                    <AlertCircle size={14} />
+                    {errors.name}
+                  </p>
+                )}
+              </div>
+              
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Email Address *
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                    errors.email 
+                      ? 'border-red-500 focus:border-red-500' 
+                      : 'border-gray-200 focus:border-amber-500'
+                  }`}
+                  placeholder="Enter your email address"
+                />
+                {errors.email && (
+                  <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                    <AlertCircle size={14} />
+                    {errors.email}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Phone Number *
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                    errors.phone 
+                      ? 'border-red-500 focus:border-red-500' 
+                      : 'border-gray-200 focus:border-amber-500'
+                  }`}
+                  placeholder="Enter your phone number"
+                />
+                {errors.phone && (
+                  <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                    <AlertCircle size={14} />
+                    {errors.phone}
+                  </p>
+                )}
+              </div>
+              
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Project Type *
+                </label>
+                <select
+                  name="projectType"
+                  value={formData.projectType}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                    errors.projectType 
+                      ? 'border-red-500 focus:border-red-500' 
+                      : 'border-gray-200 focus:border-amber-500'
+                  }`}
+                >
+                  <option value="">Select Project Type</option>
+                  <option value="residential">Residential Interior</option>
+                  <option value="commercial">Commercial Interior</option>
+                  <option value="office">Office Design</option>
+                  <option value="renovation">Renovation</option>
+                  <option value="consultation">Design Consultation</option>
+                  <option value="other">Other</option>
+                </select>
+                {errors.projectType && (
+                  <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                    <AlertCircle size={14} />
+                    {errors.projectType}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Budget Range
+                </label>
+                <select
+                  name="budget"
+                  value={formData.budget}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-amber-500 focus:outline-none transition-colors duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  <option value="">Select Budget Range</option>
+                  <option value="under-3l">Under ₹3,00,000</option>
+                  <option value="3l-5l">₹3,00,000 - ₹5,00,000</option>
+                  <option value="5l-10l">₹5,00,000 - ₹10,00,000</option>
+                  <option value="10l-15l">₹10,00,000 - ₹15,00,000</option>
+                  <option value="15l-25l">₹15,00,000 - ₹25,00,000</option>
+                  <option value="above-25l">Above ₹25,00,000</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Timeline
+                </label>
+                <select
+                  name="timeline"
+                  value={formData.timeline}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-amber-500 focus:outline-none transition-colors duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  <option value="">Select Timeline</option>
+                  <option value="asap">ASAP</option>
+                  <option value="1-3months">1-3 months</option>
+                  <option value="3-6months">3-6 months</option>
+                  <option value="6-12months">6-12 months</option>
+                  <option value="flexible">Flexible</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Project Details
+              </label>
+              <textarea
+                name="message"
+                value={formData.message}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                rows={4}
+                className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors duration-200 resize-vertical disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                  errors.message 
+                    ? 'border-red-500 focus:border-red-500' 
+                    : 'border-gray-200 focus:border-amber-500'
+                }`}
+                placeholder="Tell us more about your project, requirements, style preferences, space details, etc."
+              />
+              {errors.message && (
+                <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                  <AlertCircle size={14} />
+                  {errors.message}
+                </p>
+              )}
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="flex-1 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Submitting...</span>
+                  </>
+                ) : (
+                  <>
+                    <MessageCircle size={18} />
+                    <span>Submit Quote Request</span>
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isSubmitting}
+                className="flex-1 bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 text-gray-800 disabled:text-gray-500 px-6 py-3 rounded-lg font-semibold transition-colors duration-200 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mt-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 mt-1">
+                    <CheckCircle2 size={18} className="text-amber-600" />
+                  </div>
+                  <div className="text-sm text-amber-800">
+                    <p className="font-semibold mb-1">What happens next?</p>
+                    <ul className="space-y-1 text-amber-700">
+                      <li>• Our design consultant will call you within 24 hours</li>
+                      <li>• We'll schedule a free consultation at your convenience</li>
+                      <li>• Receive a detailed project proposal and quote</li>
+                      <li>• No obligation - completely free consultation</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+          </form>
+        </div>
+      </div>
+    </>
+  );
+});
+
+// Main Landing Component
+const Landing = () => {
+  const heroImages = useMemo(() => [
+    "src/assets/images/img18.jpg",
+    "src/assets/images/img19.jpg", 
+    "src/assets/images/img20.jpg",
+    "src/assets/images/img21.jpg"
+  ], []);
+  
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
+  const [connectModalOpen, setConnectModalOpen] = useState(false);
+
+  // Optimized auto-slide
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) => 
@@ -2012,8 +2134,14 @@ const Landing = () => {
     return () => clearInterval(interval);
   }, [heroImages.length]);
 
-  // Navigation items
-  const navItems = [
+  // Listen for custom events
+  useEffect(() => {
+    const handleOpenQuoteForm = () => setFormOpen(true);
+    document.addEventListener('openQuoteForm', handleOpenQuoteForm);
+    return () => document.removeEventListener('openQuoteForm', handleOpenQuoteForm);
+  }, []);
+
+  const navItems = useMemo(() => [
     { name: 'Home', href: '#home', isButton: false },
     { name: 'How It Works', href: '#how-it-works', isButton: false },
     { name: 'About', href: '#about', isButton: false },
@@ -2021,18 +2149,15 @@ const Landing = () => {
     { name: 'Testimonials', href: '#testimonials', isButton: false },
     { name: 'FAQ', href: '#faq', isButton: false },
     { name: 'Get Quote', href: '#get-quote', isButton: true },
-  ];
+  ], []);
 
-  // Process steps data
-  const processSteps = [
+  const processSteps = useMemo(() => [
     {
       stepNumber: "01",
       heading: "Understanding Your Vision",
       description: "Our journey begins with you — your ideas, your lifestyle, your expectations. We start with a personal consultation where we listen carefully to what you want, how you live, and what matters most to you in a home. We discuss your aesthetic preferences, daily routines, space constraints, and budget expectations. This collaborative session helps us understand your story and build a clear vision of your ideal space.",
       images: {
         large: "src/assets/images/img2.jpg",
-        small1: "src/assets/images/img3.jpg",
-        small2: "src/assets/images/img4.jpg"
       }
     },
     {
@@ -2041,8 +2166,6 @@ const Landing = () => {
       description: "Using detailed architectural plans and advanced 3D rendering tools, we build a digital model of your interior. You'll see your future home from every angle, with realistic lighting and accurate proportions. This immersive experience allows you to walk through your space virtually, make changes, and understand exactly how your interior will look and function before execution begins.",
       images: {
         large: "src/assets/images/img5.jpg",
-        small1: "src/assets/images/img6.jpg",
-        small2: "src/assets/images/img7.jpg"
       }
     },
     {
@@ -2051,8 +2174,6 @@ const Landing = () => {
       description: "Our material experts handpick premium-quality resources suited for durability, elegance, and long-term comfort. From engineered wood to high-gloss laminates, every element is chosen for both aesthetic appeal and daily usability. Your custom furniture goes into production at our state-of-the-art facility with strict quality control protocols ensuring perfection.",
       images: {
         large: "src/assets/images/img8.jpg",
-        small1: "src/assets/images/img9.jpg",
-        small2: "src/assets/images/img10.jpg"
       }
     },
     {
@@ -2061,8 +2182,6 @@ const Landing = () => {
       description: "Each component is wrapped using shock-resistant packaging and protective cushioning to safeguard it during transit. Our logistics team plans and schedules delivery with precision, coordinating with you for suitable timing. Your dream design is handled with the same care in shipping as it was in design and manufacturing.",
       images: {
         large: "src/assets/images/img11.jpg",
-        small1: "src/assets/images/img12.jpg",
-        small2: "src/assets/images/img13.jpg"
       }
     },
     {
@@ -2070,14 +2189,12 @@ const Landing = () => {
       heading: "Professional Installation",
       description: "Our skilled installation team transforms your space according to the finalized plan. Every element is assembled on-site with perfect alignment and spotless finish. We handle all technical aspects including electrical and plumbing adjustments. The final handover reveals your beautiful, functional, custom-designed home exactly as envisioned.",
       images: {
-        large: "src/assets/images/img14.jpg",
-        small1: "src/assets/images/img15.jpg",
-        small2: "src/assets/images/img2.jpg"
+        large: "src/assets/images/img15.jpg",
       }
     }
-  ];
+  ], []);
 
-  const handleNavClick = (href) => {
+  const handleNavClick = useCallback((href) => {
     setMenuOpen(false);
     if (href === '#get-quote') {
       setFormOpen(true);
@@ -2087,25 +2204,10 @@ const Landing = () => {
         element.scrollIntoView({ behavior: 'smooth' });
       }
     }
-  };
-
-  const handleFormSubmit = () => {
-    console.log('Form submitted:', formData);
-    alert('Thank you for your interest! We will contact you soon.');
-    setFormOpen(false);
-    setFormData({
-      name: '', email: '', phone: '', projectType: '', budget: '', timeline: '', message: ''
-    });
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Mobile Menu Backdrop */}
       {menuOpen && (
         <div 
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -2113,11 +2215,9 @@ const Landing = () => {
         />
       )}
 
-      {/* Navigation - Made fully transparent and increased logo size */}
       <nav className="absolute top-0 left-0 right-0 z-50">
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-3">
           <div className="flex justify-between items-center">
-            {/* Logo - Increased size */}
             <a 
               href="#home" 
               className="flex items-center transform hover:scale-105 transition-transform duration-300"
@@ -2135,7 +2235,6 @@ const Landing = () => {
               </div>
             </a>
             
-            {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center space-x-8">
               {navItems.map((item) => (
                 <div key={item.name}>
@@ -2162,7 +2261,6 @@ const Landing = () => {
               ))}
             </div>
 
-            {/* Mobile Menu Button */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               className="lg:hidden text-white p-2 hover:bg-white/10 rounded-lg transition-colors duration-300"
@@ -2173,7 +2271,6 @@ const Landing = () => {
         </div>
       </nav>
 
-      {/* Mobile Menu - Updated logo size */}
       <div className={`fixed top-0 left-0 h-full w-80 bg-black/95 backdrop-blur-xl z-50 transform transition-transform duration-300 ${
         menuOpen ? 'translate-x-0' : '-translate-x-full'
       } lg:hidden`}>
@@ -2182,7 +2279,7 @@ const Landing = () => {
             <img 
               src="src/assets/images/img17.jpg"
               alt="Swagruha Interiors" 
-              className="bg-white rounded-2xl h-28 w-auto max-w-[520px] object-contain"
+              className="h-28 w-[720px] max-w-[720px] object-contain"
             />
           </div>
           
@@ -2214,23 +2311,19 @@ const Landing = () => {
         </div>
       </div>
 
-      {/* Hero Section */}
       <section id="home" className="relative h-screen overflow-hidden">
-        {/* Background Images */}
         {heroImages.map((image, index) => (
           <div
             key={index}
-            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1500 ${
+            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
               index === currentImageIndex ? 'opacity-100' : 'opacity-0'
             }`}
             style={{ backgroundImage: `url(${image})` }}
           />
         ))}
         
-        {/* Overlay */}
         <div className="absolute inset-0 bg-black/40"></div>
         
-        {/* Content */}
         <div className="relative z-10 h-full flex items-center justify-center text-center text-white px-4">
           <div className="max-w-4xl">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
@@ -2249,7 +2342,6 @@ const Landing = () => {
           </div>
         </div>
 
-        {/* Indicators */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-3 z-10">
           {heroImages.map((_, index) => (
             <button
@@ -2265,10 +2357,8 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* How It Works Section */}
       <section id="how-it-works" className="py-16 lg:py-24 bg-gradient-to-br from-gray-50 to-gray-100">
         <div className="max-w-7xl mx-auto px-4 lg:px-8">
-          {/* Section Header */}
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-semibold mb-4">
               <Star size={16} className="fill-current" />
@@ -2282,7 +2372,6 @@ const Landing = () => {
             </p>
           </div>
 
-          {/* Process Cards */}
           <div className="space-y-8">
             {processSteps.map((step, index) => (
               <ProcessCard
@@ -2296,7 +2385,6 @@ const Landing = () => {
             ))}
           </div>
 
-          {/* Communication Card - Fixed padding and mobile alignment */}
           <div className="bg-white px-6 lg:px-10 py-8 lg:py-12 rounded-2xl shadow-xl mt-8 border border-gray-100">
             <div className="flex flex-col md:flex-row items-center md:items-center gap-6">
               <div className="flex items-start gap-4 flex-1 w-full md:w-auto">
@@ -2325,192 +2413,46 @@ const Landing = () => {
         </div>
       </section>
 
-    {/* About Section */}
-    <AboutSection />
+      <AboutSection />
+      <PortfolioSection />
+      <TestimonialsSection />
+      <FAQSection />
+      <FooterSection />
 
-    {/* Portfolio Section - ADD THIS */}
-    <PortfolioSection />
-
-    {/* Testimonials Section */}
-    <TestimonialsSection />
-
-    {/* FAQ Section - ADD THIS LINE */}
-    <FAQSection />
-
-    {/* Footer Section - ADD THIS */}
-    <FooterSection />
-
-    {/* Connect With Us Modal */}
-    <ConnectWithUsModal 
+      <ConnectWithUsModal 
         isOpen={connectModalOpen} 
         onClose={() => setConnectModalOpen(false)} 
-    />
+      />
 
-      {/* Quote Form Modal */}
-      {formOpen && (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 lg:p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all duration-300">
-            {/* Form Header */}
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">Get Your Free Quote</h2>
-                <p className="text-gray-600 mt-1">Tell us about your project and we'll provide a detailed estimate</p>
-              </div>
-              <button
-                onClick={() => setFormOpen(false)}
-                className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
-              >
-                <X size={24} />
-              </button>
-            </div>
+      <QuoteFormModal 
+        isOpen={formOpen} 
+        onClose={() => setFormOpen(false)} 
+      />
 
-            {/* Form */}
-            <div className="space-y-6">
-              {/* Name and Email Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-amber-500 focus:outline-none transition-colors duration-200"
-                    placeholder="Enter your full name"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-amber-500 focus:outline-none transition-colors duration-200"
-                    placeholder="Enter your email"
-                  />
-                </div>
-              </div>
-
-              {/* Phone and Project Type Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Phone Number *
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-amber-500 focus:outline-none transition-colors duration-200"
-                    placeholder="Enter your phone number"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Project Type *
-                  </label>
-                  <select
-                    name="projectType"
-                    value={formData.projectType}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-amber-500 focus:outline-none transition-colors duration-200"
-                  >
-                    <option value="">Select Project Type</option>
-                    <option value="residential">Residential Interior</option>
-                    <option value="commercial">Commercial Interior</option>
-                    <option value="office">Office Design</option>
-                    <option value="renovation">Renovation</option>
-                    <option value="consultation">Design Consultation</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Budget and Timeline Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Budget Range
-                  </label>
-                  <select
-                    name="budget"
-                    value={formData.budget}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-amber-500 focus:outline-none transition-colors duration-200"
-                  >
-                    <option value="">Select Budget Range</option>
-                    <option value="under-50k">Under ₹50,000</option>
-                    <option value="50k-1l">₹50,000 - ₹1,00,000</option>
-                    <option value="1l-3l">₹1,00,000 - ₹3,00,000</option>
-                    <option value="3l-5l">₹3,00,000 - ₹5,00,000</option>
-                    <option value="5l-10l">₹5,00,000 - ₹10,00,000</option>
-                    <option value="above-10l">Above ₹10,00,000</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Timeline
-                  </label>
-                  <select
-                    name="timeline"
-                    value={formData.timeline}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-amber-500 focus:outline-none transition-colors duration-200"
-                  >
-                    <option value="">Select Timeline</option>
-                    <option value="asap">ASAP</option>
-                    <option value="1-3months">1-3 months</option>
-                    <option value="3-6months">3-6 months</option>
-                    <option value="6-12months">6-12 months</option>
-                    <option value="flexible">Flexible</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Message */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Project Details
-                </label>
-                <textarea
-                  name="message"
-                  value={formData.message}
-                  onChange={handleInputChange}
-                  rows={4}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-amber-500 focus:outline-none transition-colors duration-200 resize-vertical"
-                  placeholder="Tell us more about your project, requirements, style preferences, etc."
-                />
-              </div>
-
-              {/* Form Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <button
-                  onClick={handleFormSubmit}
-                  className="flex-1 bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200 transform hover:scale-105"
-                >
-                  Submit Quote Request
-                </button>
-                <button
-                  onClick={() => setFormOpen(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-lg font-semibold transition-colors duration-200"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <style jsx>{`
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        .hover\\:scale-102:hover {
+          transform: scale(1.02);
+        }
+        @keyframes slide-in {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        .animate-slide-in {
+          animation: slide-in 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 };
