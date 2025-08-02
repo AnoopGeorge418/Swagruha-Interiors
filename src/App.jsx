@@ -1,12 +1,16 @@
-
-
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Landing from "./Pages/Landing";
 
 function App() {
   return (
     <>
-      <div className='flex justify-center items-center'>
-        <h1>This is a heading</h1>
-        <p>This is a Para</p>
+      <div>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Landing/>} />
+          </Routes>
+        </BrowserRouter>
       </div>
     </>
   )
