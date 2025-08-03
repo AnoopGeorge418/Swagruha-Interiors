@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import QuoteForm from "./QuoteFormModal.jsx";
+// import QuoteForm from "./QuoteFormModal.jsx";
 import { Phone, Menu, X, ChevronRight, Star, CheckCircle, Instagram, Twitter, Linkedin, Mail, MessageCircle, Users, Award, Heart, TrendingUp, CheckCircle2, Sparkles, ArrowRight, HelpCircle, MapPin, Clock, Navigation, AlertCircle  } from 'lucide-react';
 
 // Optimized Intersection Observer Hook with throttling
@@ -1280,7 +1280,7 @@ const FAQSection = React.memo(() => {
 });
 
 // Footer Section Component
-const FooterSection = React.memo(() => {
+const FooterSection = React.memo(({ menuOpen }) => {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [sectionRef, sectionVisible] = useIntersectionObserver();
 
@@ -1572,9 +1572,12 @@ const FooterSection = React.memo(() => {
           </div>
         </div>
 
+        {/* Back to Top Button - Hidden on mobile when menu is open */}
         <button
           className={`fixed bottom-8 right-8 w-12 h-12 bg-amber-500 hover:bg-amber-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 z-50 flex items-center justify-center group ${
-            showBackToTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+            showBackToTop && (!menuOpen || window.innerWidth >= 1024) 
+              ? 'opacity-100 translate-y-0' 
+              : 'opacity-0 translate-y-4 pointer-events-none'
           }`}
           onClick={handleBackToTop}
           title="Back to Top"
@@ -1783,19 +1786,36 @@ const QuoteFormModal = React.memo(({ isOpen, onClose }) => {
 
     try {
 
-      // Simulate a brief delay for better UX
-      await new Promise(resolve => setTimeout(resolve, 800));
+// Simulate a brief delay for better UX
+  await new Promise(resolve => setTimeout(resolve, 800));
 
-      // Success message UI
-    setAlert({
-      type: 'success',
-      message: 'Thank you! Your quote request has been submitted successfully. We will contact you within 24 hours.'
-    });
+  // Success message UI
+setAlert({
+  type: 'success',
+  message: 'Thank you! Your quote request has been submitted successfully. We will contact you within 24 hours.'
+});
 
-    // Prepare WhatsApp message after user confirmation
-    const whatsappMessage = `🏠 *New Quote Request - Swagruha Interiors*
-... // (same message generation logic as before)
-`;
+// Prepare WhatsApp message after user confirmation
+const whatsappMessage = `🏠 *New Quote Request - Swagruha Interiors*
+
+👤 *Client Details:*
+• Name: ${formData.name}
+• Email: ${formData.email}
+• Phone: ${formData.phone}
+
+🏗️ *Project Information:*
+• Type: ${formData.projectType ? formData.projectType.charAt(0).toUpperCase() + formData.projectType.slice(1) : 'Not specified'}
+• Budget: ${formData.budget ? formData.budget.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/-/g, ' - ') : 'Not specified'}
+• Timeline: ${formData.timeline ? formData.timeline.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/-/g, ' - ') : 'Not specified'}
+
+📝 *Project Details:*
+${formData.message ? formData.message : 'No additional details provided'}
+
+---
+*This is an automated message from our website contact form. Please contact the client within 24 hours for consultation.*
+
+📞 Call: +91 7411624897
+🌐 Website: swagruhainteriors.com`;
     const encodedMessage = encodeURIComponent(whatsappMessage);
     const whatsappNumber = '917411624897';
     const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
@@ -1813,24 +1833,6 @@ const QuoteFormModal = React.memo(({ isOpen, onClose }) => {
       // NOW open WhatsApp **after** closing the form & clearing alert!
       window.open(whatsappURL, '_blank');
     }, 1800);
-      
-      // // Success
-      // setAlert({
-      //   type: 'success',
-      //   message: 'Thank you! Your quote request has been submitted successfully. We will contact you within 24 hours.'
-      // });
-      
-      // // Reset form
-      // setFormData({
-      //   name: '', email: '', phone: '', projectType: '', budget: '', timeline: '', message: ''
-      // });
-      // setErrors({});
-      
-      // // Close form after 3 seconds
-      // setTimeout(() => {
-      //   onClose();
-      //   setAlert(null);
-      // }, 3000);
       
     } catch (error) {
       setAlert({
@@ -2216,101 +2218,124 @@ const Landing = () => {
         />
       )}
 
-      <nav className="absolute top-0 left-0 right-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 lg:px-8 py-3">
-          <div className="flex justify-between items-center">
-            <a 
-              href="#home" 
-              className="flex items-center transform hover:scale-105 transition-transform duration-300"
+{/* Main Navigation Bar - Fixed at top with logo and menu items */}
+<nav className="absolute top-0 left-0 right-0 z-50">
+  <div className="max-w-7xl mx-auto px-4 lg:px-8 py-3">
+    <div className="flex justify-between items-center">
+      {/* Company Logo */}
+      <a 
+        href="#home" 
+        className="flex items-center transform hover:scale-105 transition-transform duration-300"
+        onClick={(e) => {
+          e.preventDefault();
+          handleNavClick('#home');
+        }}
+      >
+        <div>
+          <img 
+            src="src/assets/images/img17.jpg"
+            alt="Swagruha Interiors - Premium Interior Design Services" 
+            className="rounded-2xl h-32 lg:h-48 w-auto max-w-[1200px] lg:max-w-[2000px] object-contain shadow-xl"
+          />
+        </div>
+      </a>
+      
+      {/* Desktop Navigation Menu */}
+      <div className="hidden lg:flex items-center space-x-8">
+        {navItems.map((item) => (
+          <div key={item.name}>
+            {item.isButton ? (
+              <button
+                onClick={() => handleNavClick(item.href)}
+                className="bg-amber-400 hover:bg-white hover:text-amber-500 text-black px-6 py-3 font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg cursor-pointer rounded-2xl"
+              >
+                {item.name}
+              </button>
+            ) : (
+              <a
+                href={item.href}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavClick(item.href);
+                }}
+                className="text-white font-semibold hover:text-amber-400 transition-colors duration-300 drop-shadow-lg text-sm lg:text-base"
+              >
+                {item.name}
+              </a>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Mobile Menu Toggle Button */}
+      <button
+        onClick={() => setMenuOpen(!menuOpen)}
+        className="lg:hidden text-white p-2 hover:bg-white/10 rounded-lg transition-colors duration-300"
+      >
+        {menuOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+    </div>
+  </div>
+</nav>
+
+{/* Mobile Navigation Sidebar - Fullscreen with Close Button */}
+<div className={`fixed inset-0 bg-black/95 backdrop-blur-xl z-50 transform transition-transform duration-300 ${
+  menuOpen ? 'translate-x-0' : '-translate-x-full'
+} lg:hidden`}>
+  <div className="p-6 pt-8 relative h-full overflow-y-auto">
+    
+    {/* Close Button */}
+    <div className="absolute top-4 right-4">
+      <button
+        onClick={() => setMenuOpen(false)}
+        className="text-white p-2 hover:bg-white/10 rounded-lg transition-colors duration-300"
+      >
+        <X size={28} />
+      </button>
+    </div>
+
+    {/* Mobile Logo */}
+    <div className="flex justify-center mb-8 border-b border-white/20 pb-6">
+      <img 
+        src="src/assets/images/img17.jpg"
+        alt="Swagruha Interiors - Premium Interior Design Services" 
+        className="h-20 w-auto max-w-[280px] object-contain rounded-xl"
+      />
+    </div>
+
+    {/* Mobile Menu Items */}
+    <div className="space-y-4">
+      {navItems.map((item) => (
+        <div key={item.name}>
+          {item.isButton ? (
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+                handleNavClick(item.href);
+              }}
+              className="w-full bg-amber-400 hover:bg-amber-300 text-black px-6 py-3 font-semibold transition-all duration-300 cursor-pointer rounded-2xl"
+            >
+              {item.name}
+            </button>
+          ) : (
+            <a
+              href={item.href}
               onClick={(e) => {
                 e.preventDefault();
-                handleNavClick('#home');
+                setMenuOpen(false);
+                handleNavClick(item.href);
               }}
+              className="block text-white hover:text-amber-400 font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-all duration-300"
             >
-              <div>
-                <img 
-                  src="src/assets/images/img17.jpg"
-                  alt="Swagruha Interiors" 
-                  className="rounded-2xl h-24 lg:h-32 w-auto max-w-[900px] lg:max-w-[1200px] object-contain shadow-lg"
-                />
-              </div>
+              {item.name}
             </a>
-            
-            <div className="hidden lg:flex items-center space-x-8">
-              {navItems.map((item) => (
-                <div key={item.name}>
-                  {item.isButton ? (
-                    <button
-                      onClick={() => handleNavClick(item.href)}
-                      className="bg-amber-400 hover:bg-white hover:text-amber-500 text-black px-6 py-3 font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg cursor-pointer rounded-2xl"
-                    >
-                      {item.name}
-                    </button>
-                  ) : (
-                    <a
-                      href={item.href}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleNavClick(item.href);
-                      }}
-                      className="text-white font-semibold hover:text-amber-400 transition-colors duration-300 drop-shadow-lg text-sm lg:text-base"
-                    >
-                      {item.name}
-                    </a>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="lg:hidden text-white p-2 hover:bg-white/10 rounded-lg transition-colors duration-300"
-            >
-              {menuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
+          )}
         </div>
-      </nav>
+      ))}
+    </div>
+  </div>
+</div>
 
-      <div className={`fixed top-0 left-0 h-full w-80 bg-black/95 backdrop-blur-xl z-50 transform transition-transform duration-300 ${
-        menuOpen ? 'translate-x-0' : '-translate-x-full'
-      } lg:hidden`}>
-        <div className="p-6 pt-20">
-          <div className="p-4 mb-8 mx-auto w-fit">
-            <img 
-              src="src/assets/images/img17.jpg"
-              alt="Swagruha Interiors" 
-              className="h-28 w-[720px] max-w-[720px] object-contain"
-            />
-          </div>
-          
-          <div className="space-y-4">
-            {navItems.map((item) => (
-              <div key={item.name}>
-                {item.isButton ? (
-                  <button
-                    onClick={() => handleNavClick(item.href)}
-                    className="w-full bg-amber-400 hover:bg-amber-300 text-black px-6 py-3 font-semibold transition-all duration-300 cursor-pointer rounded-2xl"
-                  >
-                    {item.name}
-                  </button>
-                ) : (
-                  <a
-                    href={item.href}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleNavClick(item.href);
-                    }}
-                    className="block text-white hover:text-amber-400 font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-all duration-300"
-                  >
-                    {item.name}
-                  </a>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
 
       <section id="home" className="relative h-screen overflow-hidden">
         {heroImages.map((image, index) => (
@@ -2418,7 +2443,7 @@ const Landing = () => {
       <PortfolioSection />
       <TestimonialsSection />
       <FAQSection />
-      <FooterSection />
+      <FooterSection menuOpen={menuOpen} />
 
       <ConnectWithUsModal 
         isOpen={connectModalOpen} 
