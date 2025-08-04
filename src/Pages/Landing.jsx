@@ -2118,7 +2118,7 @@ const Landing = () => {
     "images/img18.jpg",
     "images/img19.jpg", 
     "images/img20.jpg",
-    "images/img21.jpg"
+    "images/pro19.jpg"
   ], []);
   
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -2235,7 +2235,7 @@ const Landing = () => {
           <img 
             src="images/img17.jpg"
             alt="Swagruha Interiors - Premium Interior Design Services" 
-            className="rounded-2xl h-32 lg:h-48 w-auto max-w-[1200px] lg:max-w-[2000px] object-contain shadow-xl"
+            className="h-32 lg:h-48 w-auto max-w-[1200px] lg:max-w-[2000px] object-contain"
           />
         </div>
       </a>
@@ -2297,7 +2297,7 @@ const Landing = () => {
     {/* Mobile Logo */}
     <div className="flex justify-center mb-8 border-b border-white/20 pb-6">
       <img 
-        src="src/assets/images/img17.jpg"
+        src="images/img17.jpg"
         alt="Swagruha Interiors - Premium Interior Design Services" 
         className="h-20 w-auto max-w-[280px] object-contain rounded-xl"
       />
