@@ -444,11 +444,11 @@ const PortfolioSection = React.memo(() => {
       area: "3500 sq ft",
       duration: "75 days",
       budget: "₹15L - ₹20L",
-      image: "src/assets/images/portfolio1.jpg",
+      image: "src/assets/images/pro11.jpg",
       gallery: [
-        "src/assets/images/portfolio1.jpg",
-        "src/assets/images/portfolio1-2.jpg",
-        "src/assets/images/portfolio1-3.jpg"
+        "src/assets/images/pro12.jpg",
+        "src/assets/images/pro13.jpg",
+        "src/assets/images/pro14.jpg"
       ],
       description: "A stunning luxury villa featuring contemporary design with traditional elements. Open-plan living spaces with premium materials and smart home integration.",
       features: ["Smart Home Automation", "Premium Materials", "Custom Furniture", "Landscape Integration"],
@@ -462,11 +462,11 @@ const PortfolioSection = React.memo(() => {
       area: "2800 sq ft",
       duration: "45 days",
       budget: "₹8L - ₹12L",
-      image: "src/assets/images/portfolio2.jpg",
+      image: "src/assets/images/pro7.jpg",
       gallery: [
-        "src/assets/images/portfolio2.jpg",
-        "src/assets/images/portfolio2-2.jpg",
-        "src/assets/images/portfolio2-3.jpg"
+        "src/assets/images/pro8.jpg",
+        "src/assets/images/pro9.jpg",
+        "src/assets/images/pro10.jpg"
       ],
       description: "Contemporary office design promoting productivity and collaboration. Ergonomic spaces with biophilic design elements and energy-efficient systems.",
       features: ["Ergonomic Design", "Biophilic Elements", "Energy Efficient", "Collaborative Spaces"],
@@ -480,11 +480,11 @@ const PortfolioSection = React.memo(() => {
       area: "1800 sq ft",
       duration: "60 days",
       budget: "₹6L - ₹10L",
-      image: "src/assets/images/portfolio3.jpg",
+      image: "src/assets/images/pro1.jpg",
       gallery: [
-        "src/assets/images/portfolio3.jpg",
-        "src/assets/images/portfolio3-2.jpg",
-        "src/assets/images/portfolio3-3.jpg"
+        "src/assets/images/pro2.jpg",
+        "src/assets/images/pro3.jpg",
+        "src/assets/images/pro4.jpg"
       ],
       description: "A modern 3BHK apartment with minimalist design approach. Space optimization with multi-functional furniture and abundant natural light.",
       features: ["Space Optimization", "Multi-functional Furniture", "Natural Light", "Minimalist Design"],
@@ -498,11 +498,11 @@ const PortfolioSection = React.memo(() => {
       area: "1200 sq ft",
       duration: "30 days",
       budget: "₹5L - ₹8L",
-      image: "src/assets/images/portfolio4.jpg",
+      image: "src/assets/images/pro6.jpg",
       gallery: [
-        "src/assets/images/portfolio4.jpg",
-        "src/assets/images/portfolio4-2.jpg",
-        "src/assets/images/portfolio4-3.jpg"
+        "src/assets/images/pro5.jpg",
+        "src/assets/images/pro4.jpg",
+        "src/assets/images/pro6.jpg"
       ],
       description: "Elegant boutique hotel lobby with coastal influences. Warm materials and textures creating an inviting atmosphere for guests.",
       features: ["Coastal Theme", "Warm Materials", "Guest Experience", "Local Art Integration"],
@@ -516,11 +516,11 @@ const PortfolioSection = React.memo(() => {
       area: "4000 sq ft",
       duration: "90 days",
       budget: "₹18L - ₹25L",
-      image: "src/assets/images/portfolio5.jpg",
+      image: "src/assets/images/pro19.jpg",
       gallery: [
-        "src/assets/images/portfolio5.jpg",
-        "src/assets/images/portfolio5-2.jpg",
-        "src/assets/images/portfolio5-3.jpg"
+        "src/assets/images/pro20.jpg",
+        "src/assets/images/pro21.jpg",
+        "src/assets/images/pro22.jpg"
       ],
       description: "A perfect blend of modern aesthetics with farmhouse charm. Sustainable materials and indoor-outdoor living concept.",
       features: ["Sustainable Materials", "Indoor-Outdoor Living", "Farmhouse Charm", "Modern Aesthetics"],
@@ -534,11 +534,11 @@ const PortfolioSection = React.memo(() => {
       area: "5000 sq ft",
       duration: "120 days",
       budget: "₹30L - ₹40L",
-      image: "src/assets/images/portfolio6.jpg",
+      image: "src/assets/images/pro15.jpg",
       gallery: [
-        "src/assets/images/portfolio6.jpg",
-        "src/assets/images/portfolio6-2.jpg",
-        "src/assets/images/portfolio6-3.jpg"
+        "src/assets/images/pro16.jpg",
+        "src/assets/images/pro17.jpg",
+        "src/assets/images/pro18.jpg"
       ],
       description: "Ultra-luxury penthouse with panoramic city views. High-end finishes and custom-designed elements throughout.",
       features: ["Panoramic Views", "High-end Finishes", "Custom Design", "Ultra-luxury"],
@@ -1565,7 +1565,7 @@ const FooterSection = React.memo(({ menuOpen }) => {
             <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8">
               <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
                 <div className="text-slate-400 text-sm text-center lg:text-left">
-                  © 2024 Swagruha Interiors. All rights reserved. | Designed with ❤️ for beautiful spaces
+                  © 2025 Swagruha Interiors. All rights reserved. | Designed with ❤️ for beautiful spaces
                 </div>
               </div>
             </div>
