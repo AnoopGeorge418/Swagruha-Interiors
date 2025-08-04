@@ -12,34 +12,41 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4  # Updated version
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4  # Updated version
         with:
           node-version: '18'
+          cache: 'npm'  # Cache npm dependencies
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci  # Use npm ci instead of npm install for CI
 
       - name: Build project
         run: npm run build
 
       - name: Upload production-ready build files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  # Updated version
         with:
           name: production-files
           path: ./dist
 
   deploy:
-    name: Swagruha-Interiors-Deployment
+    name: Deploy
     needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    
+    # Add permissions for GitHub Pages
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
 
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4  # Updated version
         with:
           name: production-files
           path: ./dist

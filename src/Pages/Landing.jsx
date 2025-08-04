@@ -323,7 +323,7 @@ const AboutSection = React.memo(() => {
             <div className="relative group">
               <div className="relative overflow-hidden rounded-3xl shadow-2xl">
                 <ImageWithLoading 
-                  src="src/assets/images/img16.jpg" 
+                  src="images/img16.jpg" 
                   alt="Swagruha Interiors Showcase" 
                   className="w-full h-96 lg:h-[500px] object-cover group-hover:scale-105 transition-transform duration-700"
                 />
@@ -444,11 +444,11 @@ const PortfolioSection = React.memo(() => {
       area: "3500 sq ft",
       duration: "75 days",
       budget: "₹15L - ₹20L",
-      image: "src/assets/images/pro11.jpg",
+      image: "images/pro11.jpg",
       gallery: [
-        "src/assets/images/pro12.jpg",
-        "src/assets/images/pro13.jpg",
-        "src/assets/images/pro14.jpg"
+        "images/pro12.jpg",
+        "images/pro13.jpg",
+        "images/pro14.jpg"
       ],
       description: "A stunning luxury villa featuring contemporary design with traditional elements. Open-plan living spaces with premium materials and smart home integration.",
       features: ["Smart Home Automation", "Premium Materials", "Custom Furniture", "Landscape Integration"],
@@ -462,11 +462,11 @@ const PortfolioSection = React.memo(() => {
       area: "2800 sq ft",
       duration: "45 days",
       budget: "₹8L - ₹12L",
-      image: "src/assets/images/pro7.jpg",
+      image: "images/pro7.jpg",
       gallery: [
-        "src/assets/images/pro8.jpg",
-        "src/assets/images/pro9.jpg",
-        "src/assets/images/pro10.jpg"
+        "images/pro8.jpg",
+        "images/pro9.jpg",
+        "images/pro10.jpg"
       ],
       description: "Contemporary office design promoting productivity and collaboration. Ergonomic spaces with biophilic design elements and energy-efficient systems.",
       features: ["Ergonomic Design", "Biophilic Elements", "Energy Efficient", "Collaborative Spaces"],
@@ -480,11 +480,11 @@ const PortfolioSection = React.memo(() => {
       area: "1800 sq ft",
       duration: "60 days",
       budget: "₹6L - ₹10L",
-      image: "src/assets/images/pro1.jpg",
+      image: "images/pro1.jpg",
       gallery: [
-        "src/assets/images/pro2.jpg",
-        "src/assets/images/pro3.jpg",
-        "src/assets/images/pro4.jpg"
+        "images/pro2.jpg",
+        "images/pro3.jpg",
+        "images/pro4.jpg"
       ],
       description: "A modern 3BHK apartment with minimalist design approach. Space optimization with multi-functional furniture and abundant natural light.",
       features: ["Space Optimization", "Multi-functional Furniture", "Natural Light", "Minimalist Design"],
@@ -498,11 +498,11 @@ const PortfolioSection = React.memo(() => {
       area: "1200 sq ft",
       duration: "30 days",
       budget: "₹5L - ₹8L",
-      image: "src/assets/images/pro6.jpg",
+      image: "images/pro6.jpg",
       gallery: [
-        "src/assets/images/pro5.jpg",
-        "src/assets/images/pro4.jpg",
-        "src/assets/images/pro6.jpg"
+        "images/pro5.jpg",
+        "images/pro4.jpg",
+        "images/pro6.jpg"
       ],
       description: "Elegant boutique hotel lobby with coastal influences. Warm materials and textures creating an inviting atmosphere for guests.",
       features: ["Coastal Theme", "Warm Materials", "Guest Experience", "Local Art Integration"],
@@ -516,11 +516,11 @@ const PortfolioSection = React.memo(() => {
       area: "4000 sq ft",
       duration: "90 days",
       budget: "₹18L - ₹25L",
-      image: "src/assets/images/pro19.jpg",
+      image: "images/pro19.jpg",
       gallery: [
-        "src/assets/images/pro20.jpg",
-        "src/assets/images/pro21.jpg",
-        "src/assets/images/pro22.jpg"
+        "images/pro20.jpg",
+        "images/pro21.jpg",
+        "images/pro22.jpg"
       ],
       description: "A perfect blend of modern aesthetics with farmhouse charm. Sustainable materials and indoor-outdoor living concept.",
       features: ["Sustainable Materials", "Indoor-Outdoor Living", "Farmhouse Charm", "Modern Aesthetics"],
@@ -534,11 +534,11 @@ const PortfolioSection = React.memo(() => {
       area: "5000 sq ft",
       duration: "120 days",
       budget: "₹30L - ₹40L",
-      image: "src/assets/images/pro15.jpg",
+      image: "images/pro15.jpg",
       gallery: [
-        "src/assets/images/pro16.jpg",
-        "src/assets/images/pro17.jpg",
-        "src/assets/images/pro18.jpg"
+        "images/pro16.jpg",
+        "images/pro17.jpg",
+        "images/pro18.jpg"
       ],
       description: "Ultra-luxury penthouse with panoramic city views. High-end finishes and custom-designed elements throughout.",
       features: ["Panoramic Views", "High-end Finishes", "Custom Design", "Ultra-luxury"],
@@ -870,7 +870,7 @@ const TestimonialsSection = React.memo(() => {
       role: "Homeowner",
       location: "Mumbai",
       rating: 5,
-      image: "src/assets/images/client1.jpg",
+      image: "images/client1.jpg",
       quote: "Swagruha Interiors transformed our 3BHK into a masterpiece. Their attention to detail and modern approach exceeded our expectations. The team was professional, punctual, and delivered exactly what they promised.",
       project: "Modern Residential Interior",
       duration: "45 days"
@@ -881,7 +881,7 @@ const TestimonialsSection = React.memo(() => {
       role: "Business Owner",
       location: "Delhi",
       rating: 5,
-      image: "src/assets/images/client2.jpg",
+      image: "images/client2.jpg",
       quote: "Outstanding work on our office space! The team understood our corporate requirements perfectly and created a workspace that's both functional and inspiring. Highly recommend their services.",
       project: "Corporate Office Design",
       duration: "30 days"
@@ -892,7 +892,7 @@ const TestimonialsSection = React.memo(() => {
       role: "Architect",
       location: "Bangalore",
       rating: 5,
-      image: "src/assets/images/client3.jpg",
+      image: "images/client3.jpg",
       quote: "As an architect myself, I was impressed by their innovative design solutions and quality execution. They brought fresh ideas while respecting our budget and timeline constraints.",
       project: "Luxury Villa Interior",
       duration: "60 days"
@@ -903,7 +903,7 @@ const TestimonialsSection = React.memo(() => {
       role: "Entrepreneur",
       location: "Pune",
       rating: 5,
-      image: "src/assets/images/client4.jpg",
+      image: "images/client4.jpg",
       quote: "The 3D visualization helped us see our dream home before construction. The final result was even better than we imagined. Professional team with excellent communication throughout.",
       project: "Complete Home Makeover",
       duration: "75 days"
@@ -914,7 +914,7 @@ const TestimonialsSection = React.memo(() => {
       role: "Interior Designer",
       location: "Ahmedabad",
       rating: 5,
-      image: "src/assets/images/client5.jpg",
+      image: "images/client5.jpg",
       quote: "Collaborated with them on a luxury project. Their craftsmanship and material selection is top-notch. They understand modern design trends while maintaining functionality.",
       project: "Luxury Apartment",
       duration: "50 days"
@@ -925,7 +925,7 @@ const TestimonialsSection = React.memo(() => {
       role: "Tech Executive",
       location: "Hyderabad",
       rating: 5,
-      image: "src/assets/images/client6.jpg",
+      image: "images/client6.jpg",
       quote: "From concept to completion, Swagruha Interiors delivered excellence. Their innovative use of space and premium materials created our dream smart home. Exceptional quality and service.",
       project: "Smart Home Interior",
       duration: "65 days"
@@ -2115,10 +2115,10 @@ ${formData.message ? formData.message : 'No additional details provided'}
 // Main Landing Component
 const Landing = () => {
   const heroImages = useMemo(() => [
-    "src/assets/images/img18.jpg",
-    "src/assets/images/img19.jpg", 
-    "src/assets/images/img20.jpg",
-    "src/assets/images/img21.jpg"
+    "images/img18.jpg",
+    "images/img19.jpg", 
+    "images/img20.jpg",
+    "images/img21.jpg"
   ], []);
   
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -2160,7 +2160,7 @@ const Landing = () => {
       heading: "Understanding Your Vision",
       description: "Our journey begins with you — your ideas, your lifestyle, your expectations. We start with a personal consultation where we listen carefully to what you want, how you live, and what matters most to you in a home. We discuss your aesthetic preferences, daily routines, space constraints, and budget expectations. This collaborative session helps us understand your story and build a clear vision of your ideal space.",
       images: {
-        large: "src/assets/images/img2.jpg",
+        large: "images/img2.jpg",
       }
     },
     {
@@ -2168,7 +2168,7 @@ const Landing = () => {
       heading: "3D Visualization & Planning",
       description: "Using detailed architectural plans and advanced 3D rendering tools, we build a digital model of your interior. You'll see your future home from every angle, with realistic lighting and accurate proportions. This immersive experience allows you to walk through your space virtually, make changes, and understand exactly how your interior will look and function before execution begins.",
       images: {
-        large: "src/assets/images/img5.jpg",
+        large: "images/img5.jpg",
       }
     },
     {
@@ -2176,7 +2176,7 @@ const Landing = () => {
       heading: "Premium Material Selection",
       description: "Our material experts handpick premium-quality resources suited for durability, elegance, and long-term comfort. From engineered wood to high-gloss laminates, every element is chosen for both aesthetic appeal and daily usability. Your custom furniture goes into production at our state-of-the-art facility with strict quality control protocols ensuring perfection.",
       images: {
-        large: "src/assets/images/img8.jpg",
+        large: "images/img8.jpg",
       }
     },
     {
@@ -2184,7 +2184,7 @@ const Landing = () => {
       heading: "Secure Packing & Dispatch",
       description: "Each component is wrapped using shock-resistant packaging and protective cushioning to safeguard it during transit. Our logistics team plans and schedules delivery with precision, coordinating with you for suitable timing. Your dream design is handled with the same care in shipping as it was in design and manufacturing.",
       images: {
-        large: "src/assets/images/img11.jpg",
+        large: "images/img11.jpg",
       }
     },
     {
@@ -2192,7 +2192,7 @@ const Landing = () => {
       heading: "Professional Installation",
       description: "Our skilled installation team transforms your space according to the finalized plan. Every element is assembled on-site with perfect alignment and spotless finish. We handle all technical aspects including electrical and plumbing adjustments. The final handover reveals your beautiful, functional, custom-designed home exactly as envisioned.",
       images: {
-        large: "src/assets/images/img15.jpg",
+        large: "images/img15.jpg",
       }
     }
   ], []);
@@ -2233,7 +2233,7 @@ const Landing = () => {
       >
         <div>
           <img 
-            src="src/assets/images/img17.jpg"
+            src="images/img17.jpg"
             alt="Swagruha Interiors - Premium Interior Design Services" 
             className="rounded-2xl h-32 lg:h-48 w-auto max-w-[1200px] lg:max-w-[2000px] object-contain shadow-xl"
           />
